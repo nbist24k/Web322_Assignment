@@ -6,7 +6,7 @@ Student Email: nbist1@myseneca.ca <br>
 Date Created: 2024/09/16 <br>
 
 GITHUB URL: https://github.com/nbist24k/Web322_Assignment.git <br>
-VERCEL URL: https://web322-assignment-g282voa80-nbist24ks-projects.vercel.app <br>
+VERCEL URL: https://web322-assignment-ten.vercel.app <br>
 
 ### Technology Stack
 
