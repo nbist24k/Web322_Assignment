@@ -1,12 +1,12 @@
 # Web322 Assignment
 
-Student Name: Nirajan Bist
-Student Number: 157716226
-Student Email: nbist1@myseneca.ca
-Date Created: 2024/09/16
+Student Name: Nirajan Bist <br>
+Student Number: 157716226 <br>
+Student Email: nbist1@myseneca.ca <br>
+Date Created: 2024/09/16 <br>
 
-GITHUB URL: https://github.com/nbist24k/Web322_Assignment.git
-VERCEL URL: https://web322-assignment-g282voa80-nbist24ks-projects.vercel.app
+GITHUB URL: https://github.com/nbist24k/Web322_Assignment.git <br>
+VERCEL URL: https://web322-assignment-g282voa80-nbist24ks-projects.vercel.app <br>
 
 ### Technology Stack
 
