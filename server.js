@@ -4,7 +4,7 @@ const express = require("express");
 //get the app object from express
 const app = express();
 
-const HTTP_PORT = process.env.PORT || 8080;
+const HTTP_PORT = process.env.PORT || 3000;
 
 //add a route for the root URL
 app.get("/", (req, res) => {
