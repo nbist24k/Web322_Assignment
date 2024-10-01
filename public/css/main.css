@@ -1,0 +1,23 @@
+/* Ensure the body and html take up the full height of the screen */
+html,
+body {
+  height: 100%;
+}
+
+/* The main content should take up all available space, pushing the footer to the bottom */
+.content {
+  flex: 1 0 auto;
+}
+
+/* The footer should stick at the bottom of the page */
+footer {
+  flex-shrink: 0;
+}
+
+/* Full height container for flexbox layout */
+.d-flex-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* Ensures the container takes up full height */
+}
