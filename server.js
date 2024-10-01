@@ -1,17 +1,29 @@
 //require the express module
 const express = require("express");
 
+//require the path module
+const path = require("path");
+
 //get the app object from express
 const app = express();
 
-const HTTP_PORT = process.env.PORT || 3000;
+//get the port from the environment variable
+const HTTP_PORT = process.env.PORT || 4250;
 
-//add a route for the root URL
+//add a route for the public/css folder
+app.use(express.static("public"));
+
+//route to redirect from '/' to '/about'
 app.get("/", (req, res) => {
-  res.send("Nirajan Bist - 157716226");
+  res.redirect("/about");
+});
+
+//route to serve the about.html page
+app.get("/about", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/about.html"));
 });
 
 //run the web server
 app.listen(HTTP_PORT, () => {
-  console.log("Server is running on http://localhost:" + HTTP_PORT);
+  console.log("Express http server listening on http://localhost:" + HTTP_PORT);
 });
