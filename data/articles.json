@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "title": "The Evolution of Electric Cars",
+    "content": "Electric cars have come a long way in the last decade. From limited range to incredible advancements in battery technology, we explore the journey.",
+    "categoryId": 1,
+    "publishedDate": "2024-09-25"
+  },
+  {
+    "id": 2,
+    "title": "Top 10 Sports Cars of 2024",
+    "content": "2024 has been a great year for car enthusiasts. From Porsche to Ferrari, we list the top 10 sports cars that have been making waves.",
+    "categoryId": 2,
+    "publishedDate": "2024-09-28"
+  },
+  {
+    "id": 3,
+    "title": "Top SUVs for Families in 2024",
+    "content": "Looking for the best family SUVs of 2024? We break down the top choices based on safety, comfort, and features.",
+    "categoryId": 3,
+    "publishedDate": "2024-09-30"
+  },
+  {
+    "id": 4,
+    "title": "Sedans: A Timeless Classic",
+    "content": "Sedans have stood the test of time. We explore why these vehicles remain a favorite among car buyers.",
+    "categoryId": 4,
+    "publishedDate": "2024-10-01"
+  }
+]

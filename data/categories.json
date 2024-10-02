@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Electric Vehicles",
+    "description": "All the latest updates, news, and reviews on electric vehicles."
+  },
+  {
+    "id": 2,
+    "name": "Sports Cars",
+    "description": "A category dedicated to the most exciting sports cars in the market."
+  },
+  {
+    "id": 3,
+    "name": "SUVs",
+    "description": "Explore the best SUVs of 2024 with detailed reviews and comparisons."
+  },
+  {
+    "id": 4,
+    "name": "Sedans",
+    "description": "Find the top sedans of this year and get the latest reviews and news."
+  }
+]
