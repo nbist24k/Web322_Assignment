@@ -11,7 +11,7 @@ const app = express();
 const HTTP_PORT = process.env.PORT || 4250;
 
 //add a route for the public/css folder
-app.use(express.static("/public"));
+app.use(express.static(__dirname + "/public"));
 
 //route to redirect from '/' to '/about'
 app.get("/", (req, res) => {
