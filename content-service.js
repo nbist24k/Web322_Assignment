@@ -8,44 +8,43 @@ const path = require("path");
 let articles = [];
 let categories = [];
 
+//path to the data folder
+const dataDir = path.join(__dirname, "data");
+
 // Initialize function to load data from articles.json and categories.json
 function initialize() {
   return new Promise((resolve, reject) => {
     // Read articles.json from the data folder
-    fs.readFile(
-      path.join(__dirname, "data/articles.json"),
-      "utf8",
-      (err, data) => {
-        if (err) {
-          reject("Unable to read articles file");
-          return;
-        }
-        try {
-          articles = JSON.parse(data); // Store parsed articles in the global array
-        } catch (parseError) {
-          reject("Error parsing articles file");
-          return;
-        }
-
-        // Now read categories.json from the data folder
-        fs.readFile(
-          path.join(__dirname, "data/categories.json"),
-          "utf8",
-          (err, data) => {
-            if (err) {
-              reject("Unable to read categories file");
-              return;
-            }
-            try {
-              categories = JSON.parse(data); // Store parsed categories in the global array
-              resolve(); // Both files have been read successfully
-            } catch (parseError) {
-              reject("Error parsing categories file");
-            }
-          }
-        );
+    fs.readFile(path.join(dataDir, "articles.json"), "utf8", (err, data) => {
+      if (err) {
+        reject("Unable to read articles file");
+        return;
       }
-    );
+      try {
+        articles = JSON.parse(data); // Store parsed articles in the global array
+      } catch (parseError) {
+        reject("Error parsing articles file");
+        return;
+      }
+
+      // Now read categories.json from the data folder
+      fs.readFile(
+        path.join(dataDir, "categories.json"),
+        "utf8",
+        (err, data) => {
+          if (err) {
+            reject("Unable to read categories file");
+            return;
+          }
+          try {
+            categories = JSON.parse(data); // Store parsed categories in the global array
+            resolve(); // Both files have been read successfully
+          } catch (parseError) {
+            reject("Error parsing categories file");
+          }
+        }
+      );
+    });
   });
 }
 
