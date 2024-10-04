@@ -31,7 +31,7 @@ app.get("/articles", (req, res) => {
   contentService
     .getPublishedArticles()
     .then((articles) => res.json(articles))
-    .catch((err) => res.json({ message: err }));
+    .catch((err) => res.status(500).json({ message: err }));
 });
 
 //Categories route
@@ -39,7 +39,7 @@ app.get("/categories", (req, res) => {
   contentService
     .getCategories()
     .then((categories) => res.json(categories))
-    .catch((err) => res.json({ message: err }));
+    .catch((err) => res.status(500).json({ message: err }));
 });
 
 // Initialize the content service before starting the server
