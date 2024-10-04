@@ -7,20 +7,32 @@ const path = require("path");
 //get the app object from express
 const app = express();
 
+//
+
 //get the port from the environment variable
 const HTTP_PORT = process.env.PORT || 4250;
 
 //add a route for the public/css folder
 app.use(express.static(__dirname + "/public"));
 
-//route to redirect from '/' to '/about'
+//Home route
 app.get("/", (req, res) => {
-  res.redirect("/about");
+  res.sendFile(path.join(__dirname, "/views/home.html"));
 });
 
-//route to serve the about.html page
+//About route
 app.get("/about", (req, res) => {
   res.sendFile(path.join(__dirname, "/views/about.html"));
+});
+
+//Articles route
+app.get("/articles", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/articles.html"));
+});
+
+//Categories route
+app.get("/categories", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/categories.html"));
 });
 
 //run the web server
