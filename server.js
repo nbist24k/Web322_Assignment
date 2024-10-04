@@ -7,7 +7,8 @@ const path = require("path");
 //get the app object from express
 const app = express();
 
-//
+//require the content-service module
+const contentService = require("./content-service");
 
 //get the port from the environment variable
 const HTTP_PORT = process.env.PORT || 4250;
@@ -27,15 +28,36 @@ app.get("/about", (req, res) => {
 
 //Articles route
 app.get("/articles", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/articles.html"));
+  contentService
+    .getPublishedArticles()
+    .then((articles) => res.json(articles))
+    .catch((err) => res.json({ message: err }));
 });
 
 //Categories route
 app.get("/categories", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/categories.html"));
+  contentService
+    .getCategories()
+    .then((categories) => res.json(categories))
+    .catch((err) => res.json({ message: err }));
 });
 
-//run the web server
-app.listen(HTTP_PORT, () => {
-  console.log("Express http server listening on http://localhost:" + HTTP_PORT);
-});
+// Initialize the content service before starting the server
+contentService
+  .initialize()
+  .then(() => {
+    // Start the server after the data has been loaded
+    app.listen(HTTP_PORT, () => {
+      console.log(
+        `Express http server is running on http://localhost:${HTTP_PORT}`
+      );
+    });
+  })
+  .catch((err) => {
+    console.log("Error initializing content service:", err);
+  });
+
+// //run the web server
+// app.listen(HTTP_PORT, () => {
+//   console.log("Express http server listening on http://localhost:" + HTTP_PORT);
+// });
