@@ -1,3 +1,11 @@
+/*
+ * Student Name: Nirajan Bist
+ * Student Number: 157716226
+ * Email: nbist1@myseneca.ca
+ * Date Created: 2024/10/04
+ * Last Modified: 2024/10/04
+ */
+
 //require the express module
 const express = require("express");
 
@@ -56,8 +64,3 @@ contentService
   .catch((err) => {
     console.log("Error initializing content service:", err);
   });
-
-// //run the web server
-// app.listen(HTTP_PORT, () => {
-//   console.log("Express http server listening on http://localhost:" + HTTP_PORT);
-// });
