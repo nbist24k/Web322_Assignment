@@ -30,6 +30,20 @@ This project is a simple web application built with **Node.js** and **Express.js
 
 - No external database is used. The app reads data from local JSON files (`articles.json` and `categories.json`).
 
+## Data Sources
+
+The articles and categories used in this application are inspired by real-world data and modified for educational purposes. Each entry in the JSON files references a source from which the content was adapted or inspired:
+
+- **Articles**:
+
+  - [History of Electric Cars](https://www.energy.gov/articles/history-electric-car) - U.S. Department of Energy
+  - [Top 10 Sports Cars of 2024](https://www.autocar.co.uk/car-news/best-cars/top-10-best-sports-cars) - Autocar
+  - [Best SUVs for Families in 2024](https://www.autoweek.com/rankings/g45445032/best-family-suvs/) - Autoweek
+  - [Timeless Luxury Sedans](https://www.msn.com/en-us/autos/autos-luxury/20-timeless-luxury-sedans-that-embodied-elegance/ss-BB1qkDWW) - MSN Autos
+
+- **Categories**:  
+  Each category is curated to reflect common themes found in automotive journalism and is described in a manner consistent with typical industry overviews.
+
 ## How to Run the Application
 
 ### **Prerequisites**:
