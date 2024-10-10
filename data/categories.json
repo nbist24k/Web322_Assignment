@@ -2,21 +2,21 @@
   {
     "id": 1,
     "name": "Electric Vehicles",
-    "description": "All the latest updates, news, and reviews on electric vehicles."
+    "description": "Exploring the evolution, technology, and impact of electric vehicles through in-depth articles and analysis."
   },
   {
     "id": 2,
     "name": "Sports Cars",
-    "description": "A category dedicated to the most exciting sports cars in the market."
+    "description": "Coverage of the latest in sports car innovation, performance reviews, and market trends."
   },
   {
     "id": 3,
-    "name": "SUVs",
-    "description": "Explore the best SUVs of 2024 with detailed reviews and comparisons."
+    "name": "Family SUVs",
+    "description": "Insights and reviews on the best SUVs for families, focusing on safety, comfort, and utility features."
   },
   {
     "id": 4,
-    "name": "Sedans",
-    "description": "Find the top sedans of this year and get the latest reviews and news."
+    "name": "Luxury Sedans",
+    "description": "A look at timeless luxury sedans that combine elegance and advanced technology, featuring historical icons and modern classics."
   }
 ]
