@@ -50,6 +50,11 @@ app.get("/categories", (req, res) => {
     .catch((err) => res.status(500).json({ message: err }));
 });
 
+//Add post route
+app.get("/add-post", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/add-post.html"));
+});
+
 // Initialize the content service before starting the server
 contentService
   .initialize()
