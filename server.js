@@ -6,6 +6,9 @@
  * Last Modified: 2024/10/04
  */
 
+// dotenv configuration
+require("dotenv").config();
+
 //require the express module
 const express = require("express");
 
@@ -32,11 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 const upload = multer();
 
 //Cloudinary config
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
-});
+cloudinary.config();
 
 //Home route
 app.get("/", (req, res) => {
