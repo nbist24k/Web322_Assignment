@@ -47,12 +47,26 @@ app.get("/about", (req, res) => {
   res.sendFile(path.join(__dirname, "/views/about.html"));
 });
 
-//Articles route
+//Updated /articles route with query parameters
 app.get("/articles", (req, res) => {
-  contentService
-    .getPublishedArticles()
-    .then((articles) => res.json(articles))
-    .catch((err) => res.status(500).json({ message: err }));
+  const { category, minDate } = req.query;
+
+  if (category) {
+    contentService
+      .getArticlesByCategory(parseInt(category))
+      .then((articles) => res.json(articles))
+      .catch((err) => res.status(404).json({ message: err }));
+  } else if (minDate) {
+    contentService
+      .getArticlesByMinDate(minDate)
+      .then((articles) => res.json(articles))
+      .catch((err) => res.status(404).json({ message: err }));
+  } else {
+    contentService
+      .getAllArticles()
+      .then((articles) => res.json(articles))
+      .catch((err) => res.status(500).json({ message: err }));
+  }
 });
 
 //Categories route
@@ -66,6 +80,14 @@ app.get("/categories", (req, res) => {
 //Add post route
 app.get("/articles/add", (req, res) => {
   res.sendFile(path.join(__dirname, "/views/addArticle.html"));
+});
+
+// New route to get article by ID
+app.get("/articles/:id", (req, res) => {
+  contentService
+    .getArticleById(parseInt(req.params.id))
+    .then((article) => res.json(article))
+    .catch((err) => res.status(404).json({ message: err }));
 });
 
 // Post route for adding new articles

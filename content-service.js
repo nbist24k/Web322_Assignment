@@ -112,11 +112,54 @@ function addArticle(articleData) {
   });
 }
 
-//Export the functions
+// Get articles by category
+function getArticlesByCategory(categoryId) {
+  return new Promise((resolve, reject) => {
+    const filteredArticles = articles.filter(
+      (article) => article.categoryId === categoryId
+    );
+    if (filteredArticles.length > 0) {
+      resolve(filteredArticles);
+    } else {
+      reject("No results returned");
+    }
+  });
+}
+
+// Get articles by minimum date
+function getArticlesByMinDate(minDateStr) {
+  return new Promise((resolve, reject) => {
+    const filteredArticles = articles.filter(
+      (article) => new Date(article.publishedDate) >= new Date(minDateStr)
+    );
+    if (filteredArticles.length > 0) {
+      resolve(filteredArticles);
+    } else {
+      reject("No results returned");
+    }
+  });
+}
+
+// Get article by ID
+function getArticleById(id) {
+  return new Promise((resolve, reject) => {
+    const article = articles.find((article) => article.id === id);
+    if (article) {
+      resolve(article);
+    } else {
+      reject("No result returned");
+    }
+  });
+}
+
+// Export all functions
 module.exports = {
   initialize,
-  getPublishedArticles,
   getAllArticles,
+  getPublishedArticles,
   getCategories,
   addArticle,
+  getArticlesByCategory,
+  getArticlesByMinDate,
+  getArticleById,
 };
