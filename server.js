@@ -83,7 +83,7 @@ app.get("/articles/add", (req, res) => {
 });
 
 // New route to get article by ID
-app.get("/articles/:id", (req, res) => {
+app.get("/article/:id", (req, res) => {
   contentService
     .getArticleById(parseInt(req.params.id))
     .then((article) => res.json(article))
