@@ -21,8 +21,22 @@ const contentService = require("./content-service");
 //get the port from the environment variable
 const HTTP_PORT = process.env.PORT || 4250;
 
-//add a route for the public/css folder
+// modules for the add post form
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
+
+//Middleware
 app.use(express.static(__dirname + "/public"));
+app.use(express.urlencoded({ extended: true }));
+const upload = multer();
+
+//Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 //Home route
 app.get("/", (req, res) => {
