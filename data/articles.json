@@ -6,6 +6,7 @@
     "categoryId": 1,
     "published": true,
     "publishedDate": "2014-09-15",
+    "featureImage": "http://upload.wikimedia.org/wikipedia/commons/e/e7/Thomas_Parker_Electric_car.jpg",
     "source": "https://www.energy.gov/articles/history-electric-car"
   },
   {
@@ -15,6 +16,7 @@
     "categoryId": 2,
     "published": true,
     "publishedDate": "2024-08-02",
+    "featureImage": "https://www.autocar.co.uk/sites/autocar.co.uk/files/styles/gallery_slide/public/images/car-reviews/first-drives/legacy/10-porche-911-top-10.jpg?itok=xeeTF1aW",
     "source": "https://www.autocar.co.uk/car-news/best-cars/top-10-best-sports-cars"
   },
   {
@@ -24,6 +26,7 @@
     "categoryId": 3,
     "published": true,
     "publishedDate": "2023-10-16",
+    "featureImage": "https://hips.hearstapps.com/hmg-prod/images/07-2023-honda-cr-v-sport-touring-64d67102e50c6.jpg?crop=1.00xw:0.895xh;0,0.0171xh&resize=1200:*",
     "source": "https://www.autoweek.com/rankings/g45445032/best-family-suvs/"
   },
   {
@@ -33,6 +36,7 @@
     "categoryId": 4,
     "published": true,
     "publishedDate": "2024-10-02",
+    "featureImage": "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA1rv9Cx.img?w=768&h=432&m=6",
     "source": "https://www.msn.com/en-us/autos/autos-luxury/20-timeless-luxury-sedans-that-embodied-elegance/ss-BB1qkDWW"
   }
 ]
