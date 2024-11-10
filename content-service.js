@@ -93,10 +93,30 @@ function getCategories() {
   });
 }
 
+// Add an article
+function addArticle(articleData) {
+  return new Promise((resolve, reject) => {
+    if (!articleData) {
+      reject("No article data provided");
+      return;
+    }
+
+    articleData.published = articleData.published === undefined ? false : true;
+    articleData.id = articles.length + 1;
+    articleData.publishedDate = new Date().toISOString().split("T")[0];
+    articleData.categoryId = parseInt(articleData.category);
+    delete articleData.category;
+
+    articles.push(articleData);
+    resolve(articleData);
+  });
+}
+
 //Export the functions
 module.exports = {
   initialize,
   getPublishedArticles,
   getAllArticles,
   getCategories,
+  addArticle,
 };

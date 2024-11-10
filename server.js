@@ -64,8 +64,50 @@ app.get("/categories", (req, res) => {
 });
 
 //Add post route
-app.get("/add-post", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/add-post.html"));
+app.get("/articles/add", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/addArticle.html"));
+});
+
+// Post route for adding new articles
+app.post("/articles/add", upload.single("featureImage"), (req, res) => {
+  if (req.file) {
+    let streamUpload = (req) => {
+      return new Promise((resolve, reject) => {
+        let stream = cloudinary.uploader.upload_stream((error, result) => {
+          if (result) {
+            resolve(result);
+          } else {
+            reject(error);
+          }
+        });
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+    };
+
+    async function upload(req) {
+      let result = await streamUpload(req);
+      return result;
+    }
+
+    upload(req).then((uploaded) => {
+      processArticle(uploaded.url);
+    });
+  } else {
+    processArticle("");
+  }
+
+  function processArticle(imageUrl) {
+    req.body.featureImage = imageUrl;
+    contentService
+      .addArticle(req.body)
+      .then(() => res.redirect("/articles"))
+      .catch((err) => res.status(500).send(err));
+  }
+});
+
+// 404 route
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "/views/404.html"));
 });
 
 // Initialize the content service before starting the server
