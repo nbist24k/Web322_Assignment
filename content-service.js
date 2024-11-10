@@ -100,15 +100,20 @@ function addArticle(articleData) {
       reject("No article data provided");
       return;
     }
+    // Create new article with consistent property order
+    const newArticle = {
+      id: articles.length + 1,
+      title: articleData.title || "",
+      content: articleData.content || "",
+      categoryId: parseInt(articleData.categoryId),
+      published: articleData.published === undefined ? false : true,
+      publishedDate: new Date().toISOString().split("T")[0],
+      featureImage: articleData.featureImage || "",
+      source: articleData.source || "",
+    };
 
-    articleData.published = articleData.published === undefined ? false : true;
-    articleData.id = articles.length + 1;
-    articleData.publishedDate = new Date().toISOString().split("T")[0];
-    articleData.categoryId = parseInt(articleData.category);
-    delete articleData.category;
-
-    articles.push(articleData);
-    resolve(articleData);
+    articles.push(newArticle);
+    resolve(newArticle);
   });
 }
 
