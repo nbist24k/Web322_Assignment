@@ -70,8 +70,13 @@
           ></textarea>
         </div>
         <div class="mb-3">
-          <label for="category" class="form-label">Category</label>
-          <select class="form-control" id="category" name="category" required>
+          <label for="categoryId" class="form-label">Category</label>
+          <select
+            class="form-control"
+            id="categoryId"
+            name="categoryId"
+            required
+          >
             <option value="">Select a category</option>
             <!-- Categories will be loaded dynamically -->
           </select>
@@ -113,7 +118,7 @@
 
     <script>
       async function loadCategories() {
-        const categorySelect = document.getElementById("category");
+        const categorySelect = document.getElementById("categoryId");
         try {
           const response = await fetch("/categories");
           const categories = await response.json();
