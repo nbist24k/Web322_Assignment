@@ -6,7 +6,7 @@
 **Date Created**: 2024/09/16 <br>
 
 **GitHub URL**: [https://github.com/nbist24k/Web322_Assignment.git](https://github.com/nbist24k/Web322_Assignment.git) <br>
-**Vercel URL**: [https://web322-assignment-ten.vercel.app](https://web322-assignment-ten.vercel.app) <br>
+**Vercel URL**: [https://web322-assignment-ten.vercel.app](https://web322-assignment-ten.vercel.app/) <br>
 
 ## Overview
 
