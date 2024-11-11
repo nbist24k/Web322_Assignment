@@ -27,6 +27,9 @@ const HTTP_PORT = process.env.PORT || 4250;
 // File size limit (4.5MB) for vercel deployment
 const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
 
+// Allowed image MIME types
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif"];
+
 // modules for the add post form
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -36,22 +39,24 @@ const streamifier = require("streamifier");
 app.use(express.static(__dirname + "/public"));
 app.use(express.urlencoded({ extended: true }));
 
-// Multer configuration with file filter and size limit
+// Multer configuration with strict file size limit
 const upload = multer({
   limits: {
     fileSize: MAX_FILE_SIZE,
   },
   fileFilter: (req, file, cb) => {
-    // Check file size before processing
+    // Check file type first
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      cb(new Error("Only JPG, PNG, and GIF images are allowed"));
+      return;
+    }
+
+    // Then check file size
     if (parseInt(req.headers["content-length"]) > MAX_FILE_SIZE) {
       cb(new Error("File size exceeds 4.5MB limit for deployment"));
       return;
     }
 
-    // Check file type
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed"));
-    }
     cb(null, true);
   },
 }).single("featureImage");
@@ -141,7 +146,6 @@ app.get("/article/:id", (req, res) => {
     .catch((err) => res.status(404).json({ message: err }));
 });
 
-// Updated post route with custom upload handling
 app.post("/articles/add", handleUpload, (req, res) => {
   if (req.file) {
     let streamUpload = (req) => {
