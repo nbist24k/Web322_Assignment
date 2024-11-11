@@ -48,16 +48,7 @@
 
     <div class="container mt-5 content">
       <h2>Add New Article</h2>
-
-      <!-- Error Alert -->
-      <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
-
-      <form
-        action="/articles/add"
-        method="post"
-        enctype="multipart/form-data"
-        id="articleForm"
-      >
+      <form action="/articles/add" method="post" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="title" class="form-label">Title</label>
           <input
@@ -87,6 +78,7 @@
             required
           >
             <option value="">Select a category</option>
+            <!-- Categories will be loaded dynamically -->
           </select>
         </div>
         <div class="mb-3">
@@ -96,11 +88,7 @@
             class="form-control"
             id="featureImage"
             name="featureImage"
-            accept="image/*"
           />
-          <div class="form-text">
-            Supported formats: JPG, JPEG, PNG, GIF. Maximum size: 5MB
-          </div>
         </div>
         <div class="mb-3 form-check">
           <input
@@ -129,18 +117,6 @@
     </footer>
 
     <script>
-      // Show error message if present in URL
-      window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get("error");
-        if (error) {
-          const errorAlert = document.getElementById("errorAlert");
-          errorAlert.textContent = error;
-          errorAlert.classList.remove("d-none");
-        }
-      };
-
-      // Load categories
       async function loadCategories() {
         const categorySelect = document.getElementById("categoryId");
         try {
@@ -154,10 +130,8 @@
           });
         } catch (error) {
           console.error("Error loading categories:", error);
-          const errorAlert = document.getElementById("errorAlert");
-          errorAlert.textContent =
-            "Error loading categories. Please try again later.";
-          errorAlert.classList.remove("d-none");
+          categorySelect.innerHTML =
+            '<option value="">Error loading categories</option>';
         }
       }
 

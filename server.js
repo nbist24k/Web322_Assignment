@@ -24,6 +24,9 @@ const contentService = require("./content-service");
 //get the port from the environment variable
 const HTTP_PORT = process.env.PORT || 4250;
 
+// File size limit (5MB)
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
 // modules for the add post form
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -32,7 +35,20 @@ const streamifier = require("streamifier");
 //Middleware
 app.use(express.static(__dirname + "/public"));
 app.use(express.urlencoded({ extended: true }));
-const upload = multer();
+
+// Multer configuration with file filter and size limit
+const upload = multer({
+  limits: {
+    fileSize: MAX_FILE_SIZE,
+  },
+  fileFilter: (req, file, cb) => {
+    // Check file type
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"));
+    }
+    cb(null, true);
+  },
+}).single("featureImage");
 
 //Cloudinary config
 cloudinary.config({
@@ -95,40 +111,80 @@ app.get("/article/:id", (req, res) => {
     .catch((err) => res.status(404).json({ message: err }));
 });
 
-// Post route for adding new articles
-app.post("/articles/add", upload.single("featureImage"), (req, res) => {
-  if (req.file) {
-    let streamUpload = (req) => {
-      return new Promise((resolve, reject) => {
-        let stream = cloudinary.uploader.upload_stream((error, result) => {
-          if (result) {
-            resolve(result);
-          } else {
-            reject(error);
-          }
-        });
-        streamifier.createReadStream(req.file.buffer).pipe(stream);
-      });
-    };
-
-    async function upload(req) {
-      let result = await streamUpload(req);
-      return result;
+// Post route for adding new articles with enhanced error handling
+app.post("/articles/add", (req, res) => {
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.redirect(
+          "/articles/add?error=" +
+            encodeURIComponent("File size must be less than 5MB")
+        );
+      }
+      return res.redirect(
+        "/articles/add?error=" + encodeURIComponent("Error uploading file")
+      );
+    } else if (err) {
+      return res.redirect(
+        "/articles/add?error=" + encodeURIComponent(err.message)
+      );
     }
 
-    upload(req).then((uploaded) => {
-      processArticle(uploaded.url);
-    });
-  } else {
-    processArticle("");
-  }
+    // Process the file upload if it exists
+    if (req.file) {
+      let streamUpload = (req) => {
+        return new Promise((resolve, reject) => {
+          let stream = cloudinary.uploader.upload_stream(
+            {
+              resource_type: "image",
+              allowed_formats: ["jpg", "jpeg", "png", "gif"],
+              max_bytes: MAX_FILE_SIZE,
+            },
+            (error, result) => {
+              if (result) {
+                resolve(result);
+              } else {
+                reject(error);
+              }
+            }
+          );
+          streamifier.createReadStream(req.file.buffer).pipe(stream);
+        });
+      };
+
+      async function upload(req) {
+        try {
+          let result = await streamUpload(req);
+          return result;
+        } catch (error) {
+          throw new Error("Error uploading to Cloudinary");
+        }
+      }
+
+      upload(req)
+        .then((uploaded) => {
+          processArticle(uploaded.url);
+        })
+        .catch((error) => {
+          res.redirect(
+            "/articles/add?error=" + encodeURIComponent(error.message)
+          );
+        });
+    } else {
+      processArticle("");
+    }
+  });
 
   function processArticle(imageUrl) {
     req.body.featureImage = imageUrl;
     contentService
       .addArticle(req.body)
       .then(() => res.redirect("/articles"))
-      .catch((err) => res.status(500).send(err));
+      .catch((err) => {
+        res.redirect(
+          "/articles/add?error=" + encodeURIComponent("Error creating article")
+        );
+      });
   }
 });
 
