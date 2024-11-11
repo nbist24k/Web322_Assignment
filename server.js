@@ -24,8 +24,8 @@ const contentService = require("./content-service");
 //get the port from the environment variable
 const HTTP_PORT = process.env.PORT || 4250;
 
-// File size limit (5MB)
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+// File size limit (4.5MB) for vercel deployment
+const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
 
 // modules for the add post form
 const multer = require("multer");
@@ -42,6 +42,12 @@ const upload = multer({
     fileSize: MAX_FILE_SIZE,
   },
   fileFilter: (req, file, cb) => {
+    // Check file size before processing
+    if (parseInt(req.headers["content-length"]) > MAX_FILE_SIZE) {
+      cb(new Error("File size exceeds 4.5MB limit for deployment"));
+      return;
+    }
+
     // Check file type
     if (!file.mimetype.startsWith("image/")) {
       return cb(new Error("Only image files are allowed"));
@@ -49,6 +55,30 @@ const upload = multer({
     cb(null, true);
   },
 }).single("featureImage");
+
+// Custom error handling middleware for multer
+const handleUpload = (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.redirect(
+          "/articles/add?error=" +
+            encodeURIComponent(
+              "File size must be less than 4.5MB for deployment"
+            )
+        );
+      }
+      return res.redirect(
+        "/articles/add?error=" + encodeURIComponent("Error uploading file")
+      );
+    } else if (err) {
+      return res.redirect(
+        "/articles/add?error=" + encodeURIComponent(err.message)
+      );
+    }
+    next();
+  });
+};
 
 //Cloudinary config
 cloudinary.config({
@@ -111,69 +141,50 @@ app.get("/article/:id", (req, res) => {
     .catch((err) => res.status(404).json({ message: err }));
 });
 
-// Post route for adding new articles with enhanced error handling
-app.post("/articles/add", (req, res) => {
-  upload(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      if (err.code === "LIMIT_FILE_SIZE") {
-        return res.redirect(
-          "/articles/add?error=" +
-            encodeURIComponent("File size must be less than 5MB")
-        );
-      }
-      return res.redirect(
-        "/articles/add?error=" + encodeURIComponent("Error uploading file")
-      );
-    } else if (err) {
-      return res.redirect(
-        "/articles/add?error=" + encodeURIComponent(err.message)
-      );
-    }
-
-    // Process the file upload if it exists
-    if (req.file) {
-      let streamUpload = (req) => {
-        return new Promise((resolve, reject) => {
-          let stream = cloudinary.uploader.upload_stream(
-            {
-              resource_type: "image",
-              allowed_formats: ["jpg", "jpeg", "png", "gif"],
-              max_bytes: MAX_FILE_SIZE,
-            },
-            (error, result) => {
-              if (result) {
-                resolve(result);
-              } else {
-                reject(error);
-              }
+// Updated post route with custom upload handling
+app.post("/articles/add", handleUpload, (req, res) => {
+  if (req.file) {
+    let streamUpload = (req) => {
+      return new Promise((resolve, reject) => {
+        let stream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: "image",
+            allowed_formats: ["jpg", "jpeg", "png", "gif"],
+            max_bytes: MAX_FILE_SIZE,
+          },
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
             }
-          );
-          streamifier.createReadStream(req.file.buffer).pipe(stream);
-        });
-      };
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+    };
 
-      async function upload(req) {
-        try {
-          let result = await streamUpload(req);
-          return result;
-        } catch (error) {
-          throw new Error("Error uploading to Cloudinary");
-        }
+    async function upload(req) {
+      try {
+        let result = await streamUpload(req);
+        return result;
+      } catch (error) {
+        throw new Error("Error uploading to Cloudinary");
       }
-
-      upload(req)
-        .then((uploaded) => {
-          processArticle(uploaded.url);
-        })
-        .catch((error) => {
-          res.redirect(
-            "/articles/add?error=" + encodeURIComponent(error.message)
-          );
-        });
-    } else {
-      processArticle("");
     }
-  });
+
+    upload(req)
+      .then((uploaded) => {
+        processArticle(uploaded.url);
+      })
+      .catch((error) => {
+        res.redirect(
+          "/articles/add?error=" + encodeURIComponent(error.message)
+        );
+      });
+  } else {
+    processArticle("");
+  }
 
   function processArticle(imageUrl) {
     req.body.featureImage = imageUrl;
