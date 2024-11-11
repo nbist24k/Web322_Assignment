@@ -35,7 +35,12 @@ app.use(express.urlencoded({ extended: true }));
 const upload = multer();
 
 //Cloudinary config
-cloudinary.config();
+cloudinary.config({
+  cloud_name: "doupy867d",
+  api_key: "937327957236582",
+  api_secret: "7VM1-mzRECI77BU_xkSbYPMi81g",
+  secure: true,
+});
 
 //Home route
 app.get("/", (req, res) => {
