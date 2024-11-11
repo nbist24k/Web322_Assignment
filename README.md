@@ -1,72 +1,183 @@
 # Web322 Assignment
 
-**Student Name**: Nirajan Bist <br>
-**Student Number**: 157716226 <br>
-**Student Email**: nbist1@myseneca.ca <br>
-**Date Created**: 2024/09/16 <br>
+**Student Name**: Nirajan Bist  
+**Student Number**: 157716226  
+**Student Email**: nbist1@myseneca.ca  
+**Date Created**: 2024/09/16
 
-**GitHub URL**: [https://github.com/nbist24k/Web322_Assignment.git](https://github.com/nbist24k/Web322_Assignment.git) <br>
-**Vercel URL**: [https://web322-assignment-ten.vercel.app](https://web322-assignment-ten.vercel.app/) <br>
+**GitHub URL**: [https://github.com/nbist24k/Web322_Assignment.git](https://github.com/nbist24k/Web322_Assignment.git)  
+**Vercel URL**: [https://web322-assignment-ten.vercel.app](https://web322-assignment-ten.vercel.app/)
 
-## Overview
+## 🚀 Overview
 
-This project is a simple web application built with **Node.js** and **Express.js**. It fetches and displays articles and categories from local JSON files, and provides several routes for accessing this data, alongside static pages like the home and about pages.
+A professional car blog application built with Node.js and Express.js, featuring article management, category filtering, and image uploads. The application showcases various automotive topics including Electric Vehicles, Sports Cars, Family SUVs, and Luxury Sedans.
 
-## Technology Stack
+## 🛠️ Technology Stack
 
-### **Frontend**:
+### Frontend
 
-- **HTML**: Used for structuring the views such as home, about, etc.
-- **CSS**: Styling for the frontend, including a custom `main.css` file.
-- **Bootstrap**: For basic responsive layout and design.
+- HTML5 for semantic markup
+- Bootstrap 5 for responsive design
+- Custom CSS for enhanced styling
+- Client-side JavaScript for dynamic interactions
 
-### **Backend**:
+### Backend
 
-- **Node.js**: JavaScript runtime used to build the server.
-- **Express.js**: Web framework for Node.js, used for routing and serving static files.
-- **File System (fs)**: Used to read JSON files containing the article and category data.
+- Node.js runtime environment
+- Express.js web framework
+- Multer for file upload handling
+- Cloudinary for image storage
+- Streamifier for buffer handling
 
-### **Database**:
+### Development
 
-- No external database is used. The app reads data from local JSON files (`articles.json` and `categories.json`).
+- Nodemon for auto-reloading
+- Vercel for deployment
 
-## Data Sources
+## 📦 Dependencies
 
-The articles and categories used in this application are inspired by real-world data and modified for educational purposes. Each entry in the JSON files references a source from which the content was adapted or inspired:
+```json
+{
+  "cloudinary": "^1.41.0",
+  "express": "^4.18.2",
+  "multer": "^1.4.5-lts.1",
+  "streamifier": "^0.1.1"
+}
+```
 
-- **Articles**:
+## 🗄️ Project Structure
 
-  - [History of Electric Cars](https://www.energy.gov/articles/history-electric-car) - U.S. Department of Energy
-  - [Top 10 Sports Cars of 2024](https://www.autocar.co.uk/car-news/best-cars/top-10-best-sports-cars) - Autocar
-  - [Best SUVs for Families in 2024](https://www.autoweek.com/rankings/g45445032/best-family-suvs/) - Autoweek
-  - [Timeless Luxury Sedans](https://www.msn.com/en-us/autos/autos-luxury/20-timeless-luxury-sedans-that-embodied-elegance/ss-BB1qkDWW) - MSN Autos
+```
+├── data/
+│   ├── articles.json         # Article data
+│   └── categories.json       # Category data
+├── public/
+│   └── css/
+│       └── style.css        # Custom styles
+├── views/
+│   ├── 404.html            # Error page
+│   ├── about.html          # About page
+│   ├── addArticle.html     # Article form
+│   ├── articles.html       # Articles list
+│   ├── categories.html     # Categories list
+│   └── home.html          # Homepage
+├── content-service.js      # Data layer
+├── server.js              # Entry point
+└── package.json          # Configuration
+```
 
-- **Categories**:  
-  Each category is curated to reflect common themes found in automotive journalism and is described in a manner consistent with typical industry overviews.
+## 🌟 Features
 
-## How to Run the Application
+### Article Management
 
-### **Prerequisites**:
+- Create and view articles
+- Category-based filtering
+- Date-based filtering
+- Image upload support
+- Publication status toggle
+- Source URL attribution
 
-- **Node.js**: Ensure Node.js is installed. You can download it from [nodejs.org](https://nodejs.org/).
+### Categories
 
-### **Steps**:
+- Electric Vehicles
+- Sports Cars
+- Family SUVs
+- Luxury Sedans
 
-1. **Clone the repository**:
+### Image System
+
+- Cloudinary integration
+- JPG/PNG/GIF support
+- 4.5MB size limit
+- Automatic URL generation
+
+## 🔌 API Endpoints
+
+### Articles
+
+```
+GET  /articles                 - List all articles
+GET  /articles?category=id     - Category filter
+GET  /articles?minDate=date    - Date filter
+GET  /article/:id             - Single article
+POST /articles/add            - Create article
+```
+
+### Categories
+
+```
+GET  /categories              - List categories
+```
+
+## 📝 Data Sources
+
+### Articles
+
+- [History of Electric Cars](https://www.energy.gov/articles/history-electric-car)
+- [Top 10 Sports Cars of 2024](https://www.autocar.co.uk/car-news/best-cars/top-10-best-sports-cars)
+- [Best SUVs for Families](https://www.autoweek.com/rankings/g45445032/best-family-suvs/)
+- [Luxury Sedans](https://www.msn.com/en-us/autos/autos-luxury/20-timeless-luxury-sedans-that-embodied-elegance/ss-BB1qkDWW)
+
+## 🚀 Setup Instructions
+
+1. **Clone Repository**
+
    ```bash
    git clone https://github.com/nbist24k/Web322_Assignment.git
+   cd Web322_Assignment
    ```
-2. **Navigate into the project directory**:
-   ```bash
-    cd Web322_assignment
-   ```
-3. **Run the server locally**:
-   ```bash
-    npm init -y
-    npm i express
-   ```
-4. **Visit the app in the browser**:  
-   Open the browser and go to http://localhost:4250.
 
-5. **Deployed version on Vercel**:  
-   Live URL: [https://web322-assignment-ten.vercel.app](https://web322-assignment-ten.vercel.app)
+2. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start Development Server**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Start Production Server**
+
+   ```bash
+   npm start
+   ```
+
+Access the application at: `http://localhost:4250`
+
+## 🔒 Security Features
+
+- File upload validation
+- Size limit enforcement (4.5MB max)
+- MIME type checking (JPG/PNG/GIF only)
+- Error handling
+- Input sanitization
+
+## 🎨 UI/UX Features
+
+- Responsive design
+- Mobile-first approach
+- Intuitive navigation
+- Form validation
+- Error feedback
+
+## 📱 Browser Support
+
+- Chrome
+- Firefox
+- Safari
+- Edge
+- Mobile browsers
+
+## 👤 Author
+
+**Nirajan Bist**
+
+- Student Number: 157716226
+- Email: nbist1@myseneca.ca
+
+## 📄 License
+
+MIT License - See LICENSE file for details
