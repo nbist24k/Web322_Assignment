@@ -1,23 +1,198 @@
-/* Ensure the body and html take up the full height of the screen */
+/* Base layout styles */
 html,
 body {
   height: 100%;
+  background-color: #f5f5f5;
 }
 
-/* The main content should take up all available space, pushing the footer to the bottom */
 .content {
   flex: 1 0 auto;
+  padding: 40px 0;
 }
 
-/* The footer should stick at the bottom of the page */
 footer {
   flex-shrink: 0;
 }
 
-/* Full height container for flexbox layout */
 .d-flex-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  /* Ensures the container takes up full height */
+}
+
+/* Modern form styles */
+form {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  background: #ffffff;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.form-control {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+}
+
+.form-control:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  background-color: #ffffff;
+}
+
+textarea.form-control {
+  min-height: 150px;
+  resize: vertical;
+}
+
+/* Custom select styling */
+select.form-control {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234a90e2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px 12px;
+  padding-right: 2.5rem;
+}
+
+/* Custom file input */
+.form-control[type="file"] {
+  padding: 10px;
+  font-size: 0.9rem;
+}
+
+.form-control[type="file"]::-webkit-file-upload-button {
+  background: #4a90e2;
+  border: 0;
+  padding: 10px 20px;
+  margin-right: 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.form-control[type="file"]::-webkit-file-upload-button:hover {
+  background: #357abd;
+  transform: translateY(-1px);
+}
+
+/* Checkbox styling */
+.form-check {
+  padding-left: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-check-input {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-left: -2rem;
+  cursor: pointer;
+  border: 2px solid #4a90e2;
+  border-radius: 4px;
+}
+
+.form-check-input:checked {
+  background-color: #4a90e2;
+  border-color: #4a90e2;
+}
+
+.form-check-label {
+  cursor: pointer;
+  font-weight: 500;
+  color: #2c3e50;
+  user-select: none;
+}
+
+/* Helper text */
+.form-text {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+/* Submit button */
+.btn-primary {
+  background: #4a90e2;
+  border: none;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.btn-primary:hover {
+  background: #357abd;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+}
+
+/* Alert styling */
+.alert {
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.alert-danger {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* Form group spacing */
+.mb-3 {
+  margin-bottom: 1.5rem;
+}
+
+/* Page title styling */
+h2 {
+  color: #2c3e50;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content {
+    padding: 20px 0;
+  }
+
+  form {
+    padding: 1.5rem;
+    margin: 0 1rem 2rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .form-control[type="file"]::-webkit-file-upload-button {
+    padding: 8px 16px;
+    margin-right: 12px;
+  }
 }
