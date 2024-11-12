@@ -146,15 +146,21 @@ app.get("/article/:id", (req, res) => {
     .catch((err) => res.status(404).json({ message: err }));
 });
 
+// Handle article creation with optional image upload
+// This endpoint processes multipart form data and supports Cloudinary image uploads
 app.post("/articles/add", handleUpload, (req, res) => {
+  // Check if an image file was included in the request
   if (req.file) {
+    // Helper function to handle Cloudinary streaming upload
+    // Uses streams for efficient memory usage with large files
     let streamUpload = (req) => {
       return new Promise((resolve, reject) => {
+        // Initialize Cloudinary upload stream with configuration
         let stream = cloudinary.uploader.upload_stream(
           {
             resource_type: "image",
             allowed_formats: ["jpg", "jpeg", "png", "gif"],
-            max_bytes: MAX_FILE_SIZE,
+            max_bytes: MAX_FILE_SIZE, // Limit file size for deployment constraints
           },
           (error, result) => {
             if (result) {
@@ -164,10 +170,13 @@ app.post("/articles/add", handleUpload, (req, res) => {
             }
           }
         );
+        // Pipe the file buffer through the upload stream
         streamifier.createReadStream(req.file.buffer).pipe(stream);
       });
     };
 
+    // Wrapper function to handle the upload process
+    // Returns a promise that resolves with the upload result
     async function upload(req) {
       try {
         let result = await streamUpload(req);
@@ -177,25 +186,34 @@ app.post("/articles/add", handleUpload, (req, res) => {
       }
     }
 
+    // Process the upload and handle success/failure
     upload(req)
       .then((uploaded) => {
+        // On successful upload, create article with image URL
         processArticle(uploaded.url);
       })
       .catch((error) => {
+        // Redirect back to form with error message if upload fails
         res.redirect(
           "/articles/add?error=" + encodeURIComponent(error.message)
         );
       });
   } else {
+    // If no image was uploaded, create article without an image
     processArticle("");
   }
 
+  // Helper function to create the article in the database
+  // Takes an optional imageUrl parameter from Cloudinary
   function processArticle(imageUrl) {
+    // Add the image URL to the request body
     req.body.featureImage = imageUrl;
+    // Attempt to create the article using the content service
     contentService
       .addArticle(req.body)
-      .then(() => res.redirect("/articles"))
+      .then(() => res.redirect("/articles")) // Redirect to articles list on success
       .catch((err) => {
+        // Redirect back to form with error message if article creation fails
         res.redirect(
           "/articles/add?error=" + encodeURIComponent("Error creating article")
         );
