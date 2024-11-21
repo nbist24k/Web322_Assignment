@@ -108,32 +108,6 @@ app.get("/about", (req, res) => {
 });
 
 //Updated /articles route with query parameters
-// app.get("/articles", async (req, res) => {
-//   try {
-//     const { category, minDate } = req.query;
-//     let articles;
-
-//     if (category) {
-//       articles = await contentService.getArticlesByCategory(parseInt(category));
-//     } else if (minDate) {
-//       articles = await contentService.getArticlesByMinDate(minDate);
-//     } else {
-//       articles = await contentService.getAllArticles();
-//     }
-
-//     res.render("articles", {
-//       articles,
-//       path: "/articles",
-//       error: null,
-//     });
-//   } catch (err) {
-//     res.render("articles", {
-//       articles: [],
-//       path: "/articles",
-//       error: err.message || "Unable to fetch articles",
-//     });
-//   }
-// });
 app.get("/articles", async (req, res) => {
   try {
     const { category, minDate } = req.query;
