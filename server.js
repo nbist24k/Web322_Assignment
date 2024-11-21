@@ -3,7 +3,7 @@
  * Student Number: 157716226
  * Email: nbist1@myseneca.ca
  * Date Created: 2024/10/04
- * Last Modified: 2024/11/12
+ * Last Modified: 2024/11/21
  */
 
 // dotenv configuration
@@ -121,11 +121,17 @@ app.get("/articles", async (req, res) => {
       articles = await contentService.getAllArticles();
     }
 
-    res.render("articles", { articles, path: "/articles" });
+    res.render("articles", {
+      articles,
+      path: "/articles",
+      error: null,
+    });
   } catch (err) {
-    res
-      .status(500)
-      .render("articles", { articles: [], path: "/articles", error: err });
+    res.render("articles", {
+      articles: [],
+      path: "/articles",
+      error: err.message || "Unable to fetch articles",
+    });
   }
 });
 
@@ -176,11 +182,41 @@ app.get("/article/:id", async (req, res) => {
     const article = await contentService.getArticleById(
       parseInt(req.params.id)
     );
-    res.render("article", { article, path: "/articles" });
+
+    if (!article) {
+      return res.render("articles", {
+        articles: [],
+        path: "/articles",
+        error: "Article not found",
+        req: req,
+      });
+    }
+
+    if (!article.published) {
+      return res.render("articles", {
+        articles: [],
+        path: "/articles",
+        error: "Article is not published",
+        req: req,
+      });
+    }
+
+    res.render("articles", {
+      articles: [article],
+      path: "/articles",
+      error: null,
+      req: req,
+    });
   } catch (err) {
-    res.status(404).render("404", { path: null });
+    res.render("articles", {
+      articles: [],
+      path: "/articles",
+      error: "Unable to fetch article",
+      req: req,
+    });
   }
 });
+
 // Handle article creation with optional image upload
 // This endpoint processes multipart form data and supports Cloudinary image uploads
 app.post("/articles/add", handleUpload, (req, res) => {
