@@ -3,7 +3,8 @@
 **Student Name**: Nirajan Bist  
 **Student Number**: 157716226  
 **Student Email**: nbist1@myseneca.ca  
-**Date Created**: 2024/09/16
+**Date Created**: 2024/09/16  
+**Last Modified**: 2024/11/21
 
 **GitHub URL**: [https://github.com/nbist24k/Web322_Assignment.git](https://github.com/nbist24k/Web322_Assignment.git)  
 **Vercel URL**: [https://web322-assignment-ten.vercel.app](https://web322-assignment-ten.vercel.app/)
@@ -16,10 +17,11 @@ A professional car blog application built with Node.js and Express.js, featuring
 
 ### Frontend
 
-- HTML5 for semantic markup
+- EJS templating engine for dynamic views
 - Bootstrap 5 for responsive design
 - Custom CSS for enhanced styling
-- Client-side JavaScript for dynamic interactions
+- Bootstrap Icons for UI elements
+- Client-side JavaScript for form validation
 
 ### Backend
 
@@ -38,8 +40,10 @@ A professional car blog application built with Node.js and Express.js, featuring
 
 ```json
 {
-  "cloudinary": "^1.41.0",
-  "express": "^4.18.2",
+  "cloudinary": "^2.5.1",
+  "dotenv": "^16.4.5",
+  "ejs": "^3.1.10",
+  "express": "^4.21.0",
   "multer": "^1.4.5-lts.1",
   "streamifier": "^0.1.1"
 }
@@ -55,12 +59,17 @@ A professional car blog application built with Node.js and Express.js, featuring
 │   └── css/
 │       └── style.css        # Custom styles
 ├── views/
-│   ├── 404.html            # Error page
-│   ├── about.html          # About page
-│   ├── addArticle.html     # Article form
-│   ├── articles.html       # Articles list
-│   ├── categories.html     # Categories list
-│   └── home.html          # Homepage
+│   ├── 404.ejs             # Error page
+│   ├── about.ejs           # About page
+│   ├── addArticle.ejs      # Article form
+│   ├── article.ejs         # Single article view
+│   ├── articles.ejs        # Articles list
+│   ├── categories.ejs      # Categories list
+│   ├── home.ejs           # Homepage
+│   └── partials/          # Reusable components
+│       ├── head.ejs       # Common head content
+│       ├── nav.ejs        # Navigation bar
+│       └── footer.ejs     # Footer component
 ├── content-service.js      # Data layer
 ├── server.js              # Entry point
 └── package.json          # Configuration
@@ -76,6 +85,8 @@ A professional car blog application built with Node.js and Express.js, featuring
 - Image upload support
 - Publication status toggle
 - Source URL attribution
+- Individual article views
+- Category name display
 
 ### Categories
 
@@ -83,6 +94,8 @@ A professional car blog application built with Node.js and Express.js, featuring
 - Sports Cars
 - Family SUVs
 - Luxury Sedans
+- Category-based article filtering
+- Detailed category cards
 
 ### Image System
 
@@ -90,6 +103,7 @@ A professional car blog application built with Node.js and Express.js, featuring
 - JPG/PNG/GIF support
 - 4.5MB size limit
 - Automatic URL generation
+- Responsive image display
 
 ## 🔌 API Endpoints
 
@@ -99,7 +113,7 @@ A professional car blog application built with Node.js and Express.js, featuring
 GET  /articles                 - List all articles
 GET  /articles?category=id     - Category filter
 GET  /articles?minDate=date    - Date filter
-GET  /article/:id             - Single article
+GET  /article/:id             - Single article view
 POST /articles/add            - Create article
 ```
 
@@ -140,7 +154,6 @@ GET  /categories              - List categories
    ```
 
 4. **Start Production Server**
-
    ```bash
    npm start
    ```
@@ -154,6 +167,7 @@ Access the application at: `http://localhost:4250`
 - MIME type checking (JPG/PNG/GIF only)
 - Error handling
 - Input sanitization
+- Published status verification
 
 ## 🎨 UI/UX Features
 
@@ -162,6 +176,10 @@ Access the application at: `http://localhost:4250`
 - Intuitive navigation
 - Form validation
 - Error feedback
+- Category badges
+- Article cards
+- Interactive tables
+- Bootstrap icons integration
 
 ## 📱 Browser Support
 
