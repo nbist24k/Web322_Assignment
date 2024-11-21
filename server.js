@@ -108,6 +108,32 @@ app.get("/about", (req, res) => {
 });
 
 //Updated /articles route with query parameters
+// app.get("/articles", async (req, res) => {
+//   try {
+//     const { category, minDate } = req.query;
+//     let articles;
+
+//     if (category) {
+//       articles = await contentService.getArticlesByCategory(parseInt(category));
+//     } else if (minDate) {
+//       articles = await contentService.getArticlesByMinDate(minDate);
+//     } else {
+//       articles = await contentService.getAllArticles();
+//     }
+
+//     res.render("articles", {
+//       articles,
+//       path: "/articles",
+//       error: null,
+//     });
+//   } catch (err) {
+//     res.render("articles", {
+//       articles: [],
+//       path: "/articles",
+//       error: err.message || "Unable to fetch articles",
+//     });
+//   }
+// });
 app.get("/articles", async (req, res) => {
   try {
     const { category, minDate } = req.query;
@@ -115,22 +141,35 @@ app.get("/articles", async (req, res) => {
 
     if (category) {
       articles = await contentService.getArticlesByCategory(parseInt(category));
+      if (!articles || articles.length === 0) {
+        return res.render("articles", {
+          articles: [],
+          path: "/articles",
+          error: `No articles found for category ${category}`,
+          req: req,
+        });
+      }
     } else if (minDate) {
       articles = await contentService.getArticlesByMinDate(minDate);
     } else {
       articles = await contentService.getAllArticles();
     }
 
+    // Filter out unpublished articles
+    articles = articles.filter((article) => article.published);
+
     res.render("articles", {
       articles,
       path: "/articles",
       error: null,
+      req: req,
     });
   } catch (err) {
     res.render("articles", {
       articles: [],
       path: "/articles",
       error: err.message || "Unable to fetch articles",
+      req: req,
     });
   }
 });
@@ -139,26 +178,17 @@ app.get("/articles", async (req, res) => {
 app.get("/categories", async (req, res) => {
   try {
     const categories = await contentService.getCategories();
-    const wantsJson =
-      req.headers.accept && req.headers.accept.includes("application/json");
-
-    if (wantsJson) {
-      res.json(categories);
-    } else {
-      res.render("categories", { categories, path: "/categories" });
-    }
+    res.render("categories", {
+      categories,
+      path: "/categories",
+      error: null,
+    });
   } catch (err) {
-    const wantsJson =
-      req.headers.accept && req.headers.accept.includes("application/json");
-    if (wantsJson) {
-      res.status(500).json({ error: err.message || err });
-    } else {
-      res.status(500).render("categories", {
-        categories: [],
-        path: "/categories",
-        error: err,
-      });
-    }
+    res.render("categories", {
+      categories: [],
+      path: "/categories",
+      error: err.message || "Unable to fetch categories",
+    });
   }
 });
 
