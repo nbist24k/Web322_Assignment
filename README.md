@@ -41,7 +41,6 @@ A professional car blog application built with Node.js and Express.js, featuring
 ```json
 {
   "cloudinary": "^2.5.1",
-  "dotenv": "^16.4.5",
   "ejs": "^3.1.10",
   "express": "^4.21.0",
   "multer": "^1.4.5-lts.1",
@@ -69,10 +68,13 @@ A professional car blog application built with Node.js and Express.js, featuring
 │   └── partials/          # Reusable components
 │       ├── head.ejs       # Common head content
 │       ├── nav.ejs        # Navigation bar
-│       └── footer.ejs     # Footer component
+│       ├── footer.ejs     # Footer component
+│       └── scripts.ejs    # Common scripts
 ├── content-service.js      # Data layer
 ├── server.js              # Entry point
-└── package.json          # Configuration
+├── package.json          # Configuration
+├── package-lock.json     # Dependency lock file
+└── vercel.json          # Vercel deployment config
 ```
 
 ## 🌟 Features
@@ -80,13 +82,13 @@ A professional car blog application built with Node.js and Express.js, featuring
 ### Article Management
 
 - Create and view articles
+- Individual article views
+- Category name display
 - Category-based filtering
 - Date-based filtering
 - Image upload support
 - Publication status toggle
 - Source URL attribution
-- Individual article views
-- Category name display
 
 ### Categories
 
@@ -154,6 +156,7 @@ GET  /categories              - List categories
    ```
 
 4. **Start Production Server**
+
    ```bash
    npm start
    ```
