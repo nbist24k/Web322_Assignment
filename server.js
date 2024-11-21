@@ -35,9 +35,13 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 
+// Set the view engine to ejs
+app.set("view engine", "ejs");
+
 //Middleware
 app.use(express.static(__dirname + "/public"));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Multer configuration with strict file size limit
 const upload = multer({
@@ -95,72 +99,99 @@ cloudinary.config({
 
 //Home route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/home.html"));
+  res.render("home", { path: "/" });
 });
 
 //About route
 app.get("/about", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/about.html"));
+  res.render("about", { path: "/about" });
 });
 
 //Updated /articles route with query parameters
-app.get("/articles", (req, res) => {
-  const { category, minDate } = req.query;
+app.get("/articles", async (req, res) => {
+  try {
+    const { category, minDate } = req.query;
+    let articles;
 
-  if (category) {
-    contentService
-      .getArticlesByCategory(parseInt(category))
-      .then((articles) => res.json(articles))
-      .catch((err) => res.status(404).json({ message: err }));
-  } else if (minDate) {
-    contentService
-      .getArticlesByMinDate(minDate)
-      .then((articles) => res.json(articles))
-      .catch((err) => res.status(404).json({ message: err }));
-  } else {
-    contentService
-      .getAllArticles()
-      .then((articles) => res.json(articles))
-      .catch((err) => res.status(500).json({ message: err }));
+    if (category) {
+      articles = await contentService.getArticlesByCategory(parseInt(category));
+    } else if (minDate) {
+      articles = await contentService.getArticlesByMinDate(minDate);
+    } else {
+      articles = await contentService.getAllArticles();
+    }
+
+    res.render("articles", { articles, path: "/articles" });
+  } catch (err) {
+    res
+      .status(500)
+      .render("articles", { articles: [], path: "/articles", error: err });
   }
 });
 
 //Categories route
-app.get("/categories", (req, res) => {
-  contentService
-    .getCategories()
-    .then((categories) => res.json(categories))
-    .catch((err) => res.status(500).json({ message: err }));
+app.get("/categories", async (req, res) => {
+  try {
+    const categories = await contentService.getCategories();
+    const wantsJson =
+      req.headers.accept && req.headers.accept.includes("application/json");
+
+    if (wantsJson) {
+      res.json(categories);
+    } else {
+      res.render("categories", { categories, path: "/categories" });
+    }
+  } catch (err) {
+    const wantsJson =
+      req.headers.accept && req.headers.accept.includes("application/json");
+    if (wantsJson) {
+      res.status(500).json({ error: err.message || err });
+    } else {
+      res.status(500).render("categories", {
+        categories: [],
+        path: "/categories",
+        error: err,
+      });
+    }
+  }
 });
 
 //Add post route
-app.get("/articles/add", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/addArticle.html"));
+app.get("/articles/add", async (req, res) => {
+  try {
+    const categories = await contentService.getCategories();
+    res.render("addArticle", { path: "/articles/add", categories });
+  } catch (err) {
+    res.render("addArticle", {
+      path: "/articles/add",
+      categories: [],
+      error: err,
+    });
+  }
 });
 
 // New route to get article by ID
-app.get("/article/:id", (req, res) => {
-  contentService
-    .getArticleById(parseInt(req.params.id))
-    .then((article) => res.json(article))
-    .catch((err) => res.status(404).json({ message: err }));
+app.get("/article/:id", async (req, res) => {
+  try {
+    const article = await contentService.getArticleById(
+      parseInt(req.params.id)
+    );
+    res.render("article", { article, path: "/articles" });
+  } catch (err) {
+    res.status(404).render("404", { path: null });
+  }
 });
-
 // Handle article creation with optional image upload
 // This endpoint processes multipart form data and supports Cloudinary image uploads
 app.post("/articles/add", handleUpload, (req, res) => {
-  // Check if an image file was included in the request
   if (req.file) {
-    // Helper function to handle Cloudinary streaming upload
-    // Uses streams for efficient memory usage with large files
     let streamUpload = (req) => {
       return new Promise((resolve, reject) => {
-        // Initialize Cloudinary upload stream with configuration
         let stream = cloudinary.uploader.upload_stream(
           {
             resource_type: "image",
             allowed_formats: ["jpg", "jpeg", "png", "gif"],
-            max_bytes: MAX_FILE_SIZE, // Limit file size for deployment constraints
+            max_bytes: MAX_FILE_SIZE,
           },
           (error, result) => {
             if (result) {
@@ -170,13 +201,10 @@ app.post("/articles/add", handleUpload, (req, res) => {
             }
           }
         );
-        // Pipe the file buffer through the upload stream
         streamifier.createReadStream(req.file.buffer).pipe(stream);
       });
     };
 
-    // Wrapper function to handle the upload process
-    // Returns a promise that resolves with the upload result
     async function upload(req) {
       try {
         let result = await streamUpload(req);
@@ -186,36 +214,28 @@ app.post("/articles/add", handleUpload, (req, res) => {
       }
     }
 
-    // Process the upload and handle success/failure
     upload(req)
       .then((uploaded) => {
-        // On successful upload, create article with image URL
         processArticle(uploaded.url);
       })
       .catch((error) => {
-        // Redirect back to form with error message if upload fails
         res.redirect(
           "/articles/add?error=" + encodeURIComponent(error.message)
         );
       });
   } else {
-    // If no image was uploaded, create article without an image
     processArticle("");
   }
 
-  // Helper function to create the article in the database
-  // Takes an optional imageUrl parameter from Cloudinary
   function processArticle(imageUrl) {
-    // Add the image URL to the request body
     req.body.featureImage = imageUrl;
-    // Attempt to create the article using the content service
     contentService
       .addArticle(req.body)
-      .then(() => res.redirect("/articles")) // Redirect to articles list on success
+      .then(() => res.redirect("/articles"))
       .catch((err) => {
-        // Redirect back to form with error message if article creation fails
         res.redirect(
-          "/articles/add?error=" + encodeURIComponent("Error creating article")
+          "/articles/add?error=" +
+            encodeURIComponent(err.message || "Error creating article")
         );
       });
   }
@@ -223,7 +243,7 @@ app.post("/articles/add", handleUpload, (req, res) => {
 
 // 404 route
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, "/views/404.html"));
+  res.status(404).render("404", { path: null });
 });
 
 // Initialize the content service before starting the server
@@ -239,4 +259,5 @@ contentService
   })
   .catch((err) => {
     console.log("Error initializing content service:", err);
+    process.exit(1);
   });

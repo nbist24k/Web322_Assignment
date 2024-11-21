@@ -89,7 +89,6 @@ function getCategories() {
     } else {
       reject("No categories available");
     }
-    resolve();
   });
 }
 
