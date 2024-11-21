@@ -56,12 +56,24 @@ function initialize() {
   });
 }
 
+function getCategoryNameById(categoryId) {
+  const category = categories.find((cat) => cat.id === categoryId);
+  return category ? category.name : "Unknown Category";
+}
+
+function addCategoryDetailsToArticle(article) {
+  return {
+    ...article,
+    categoryName: getCategoryNameById(article.categoryId),
+  };
+}
+
 //Get published articles (only those with `published` set to true)
 function getPublishedArticles() {
   return new Promise((resolve, reject) => {
-    const publishedArticles = articles.filter(
-      (article) => article.published === true
-    );
+    const publishedArticles = articles
+      .filter((article) => article.published === true)
+      .map(addCategoryDetailsToArticle);
     if (publishedArticles.length > 0) {
       resolve(publishedArticles);
     } else {
@@ -74,7 +86,8 @@ function getPublishedArticles() {
 function getAllArticles() {
   return new Promise((resolve, reject) => {
     if (articles.length > 0) {
-      resolve(articles);
+      const articlesWithCategories = articles.map(addCategoryDetailsToArticle);
+      resolve(articlesWithCategories);
     } else {
       reject("No articles available");
     }
@@ -99,7 +112,6 @@ function addArticle(articleData) {
       reject("No article data provided");
       return;
     }
-    // Create new article with consistent property order
     const newArticle = {
       id: articles.length + 1,
       title: articleData.title || "",
@@ -112,20 +124,22 @@ function addArticle(articleData) {
     };
 
     articles.push(newArticle);
-    resolve(newArticle);
+    resolve(addCategoryDetailsToArticle(newArticle));
   });
 }
 
 // Get articles by category
 function getArticlesByCategory(categoryId) {
   return new Promise((resolve, reject) => {
-    const filteredArticles = articles.filter(
-      (article) => article.categoryId === categoryId
-    );
+    const filteredArticles = articles
+      .filter((article) => article.categoryId === categoryId)
+      .map(addCategoryDetailsToArticle);
     if (filteredArticles.length > 0) {
       resolve(filteredArticles);
     } else {
-      reject("No results returned");
+      reject(
+        `No articles found for category: ${getCategoryNameById(categoryId)}`
+      );
     }
   });
 }
@@ -133,9 +147,11 @@ function getArticlesByCategory(categoryId) {
 // Get articles by minimum date
 function getArticlesByMinDate(minDateStr) {
   return new Promise((resolve, reject) => {
-    const filteredArticles = articles.filter(
-      (article) => new Date(article.publishedDate) >= new Date(minDateStr)
-    );
+    const filteredArticles = articles
+      .filter(
+        (article) => new Date(article.publishedDate) >= new Date(minDateStr)
+      )
+      .map(addCategoryDetailsToArticle);
     if (filteredArticles.length > 0) {
       resolve(filteredArticles);
     } else {
@@ -149,7 +165,7 @@ function getArticleById(id) {
   return new Promise((resolve, reject) => {
     const article = articles.find((article) => article.id === id);
     if (article) {
-      resolve(article);
+      resolve(addCategoryDetailsToArticle(article));
     } else {
       reject("No result returned");
     }

@@ -141,35 +141,22 @@ app.get("/articles", async (req, res) => {
 
     if (category) {
       articles = await contentService.getArticlesByCategory(parseInt(category));
-      if (!articles || articles.length === 0) {
-        return res.render("articles", {
-          articles: [],
-          path: "/articles",
-          error: `No articles found for category ${category}`,
-          req: req,
-        });
-      }
     } else if (minDate) {
       articles = await contentService.getArticlesByMinDate(minDate);
     } else {
       articles = await contentService.getAllArticles();
     }
 
-    // Filter out unpublished articles
-    articles = articles.filter((article) => article.published);
-
     res.render("articles", {
       articles,
       path: "/articles",
       error: null,
-      req: req,
     });
   } catch (err) {
     res.render("articles", {
       articles: [],
       path: "/articles",
       error: err.message || "Unable to fetch articles",
-      req: req,
     });
   }
 });
@@ -214,35 +201,31 @@ app.get("/article/:id", async (req, res) => {
     );
 
     if (!article) {
-      return res.render("articles", {
-        articles: [],
+      return res.render("article", {
+        article: null,
         path: "/articles",
         error: "Article not found",
-        req: req,
       });
     }
 
     if (!article.published) {
-      return res.render("articles", {
-        articles: [],
+      return res.render("article", {
+        article: null,
         path: "/articles",
         error: "Article is not published",
-        req: req,
       });
     }
 
-    res.render("articles", {
-      articles: [article],
+    res.render("article", {
+      article,
       path: "/articles",
       error: null,
-      req: req,
     });
   } catch (err) {
-    res.render("articles", {
-      articles: [],
+    res.render("article", {
+      article: null,
       path: "/articles",
       error: "Unable to fetch article",
-      req: req,
     });
   }
 });
