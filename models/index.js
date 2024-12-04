@@ -2,7 +2,7 @@ const { Sequelize } = require("sequelize");
 
 let sequelize;
 
-// Create Sequelize instance with connection pooling and timeout settings
+// Create Sequelize instance with optimized settings for serverless
 const initializeSequelize = () => {
   if (!sequelize) {
     sequelize = new Sequelize(
@@ -18,12 +18,18 @@ const initializeSequelize = () => {
             require: true,
             rejectUnauthorized: false,
           },
+          keepAlive: true,
+          connectTimeout: 60000,
         },
         pool: {
           max: 2,
           min: 0,
           acquire: 30000,
           idle: 10000,
+        },
+        retry: {
+          max: 5,
+          timeout: 3000,
         },
       }
     );

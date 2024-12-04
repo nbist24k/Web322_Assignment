@@ -9,30 +9,44 @@
 const { Sequelize } = require("sequelize");
 const { sequelize, Article, Category } = require("./models");
 
-// Initialize function to sync database with connection retry logic
+// Initialize function to sync database with optimized retry logic
 function initialize() {
   return new Promise(async (resolve, reject) => {
     let retries = 5;
-    while (retries) {
+    const timeout = 5000; // 5 seconds timeout between retries
+
+    const tryConnect = async () => {
       try {
         await sequelize.authenticate();
         console.log("Database connection successful.");
         await sequelize.sync();
         console.log("Database synchronized successfully.");
-        resolve();
-        break;
+        return true;
       } catch (err) {
-        retries -= 1;
-        if (retries === 0) {
-          console.error("Database initialization error:", err);
-          reject("Unable to sync the database: " + err.message);
-          break;
-        }
-        console.log(
-          `Connection attempt failed. Retrying... (${retries} attempts left)`
-        );
-        await new Promise((res) => setTimeout(res, 5000)); // Wait 5 seconds before retrying
+        console.error("Connection attempt failed:", err.message);
+        return false;
       }
+    };
+
+    while (retries > 0) {
+      const connected = await tryConnect();
+      if (connected) {
+        resolve();
+        return;
+      }
+
+      retries--;
+      if (retries === 0) {
+        reject("Unable to sync the database after multiple attempts");
+        return;
+      }
+
+      console.log(
+        `Retrying connection in ${
+          timeout / 1000
+        } seconds... (${retries} attempts left)`
+      );
+      await new Promise((res) => setTimeout(res, timeout));
     }
   });
 }
