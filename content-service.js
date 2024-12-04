@@ -1,11 +1,3 @@
-/*
- * Student Name: Nirajan Bist
- * Student Number: 157716226
- * Email: nbist1@myseneca.ca
- * Date Created: 2024/10/04
- * Last Modified: 2024/12/04
- */
-
 const { Sequelize } = require("sequelize");
 const { sequelize, Article, Category } = require("./models");
 
@@ -169,6 +161,75 @@ function addArticle(articleData) {
   });
 }
 
+// Update an article
+function updateArticle(id, articleData) {
+  return new Promise((resolve, reject) => {
+    if (!articleData) {
+      reject("No article data provided");
+      return;
+    }
+
+    Article.update(
+      {
+        title: articleData.title,
+        content: articleData.content,
+        categoryId: parseInt(articleData.categoryId),
+        published: articleData.published === undefined ? false : true,
+        featureImage: articleData.featureImage,
+        source: articleData.source,
+      },
+      {
+        where: { id: parseInt(id) },
+      }
+    )
+      .then(() => {
+        return Article.findByPk(id, {
+          include: [
+            {
+              model: Category,
+              as: "category",
+            },
+          ],
+        });
+      })
+      .then((article) => {
+        if (!article) {
+          reject("Article not found");
+          return;
+        }
+        const formattedArticle = {
+          ...article.get({ plain: true }),
+          categoryName: article.category.name,
+        };
+        resolve(formattedArticle);
+      })
+      .catch((err) => {
+        console.error("Error updating article:", err);
+        reject("Error updating article");
+      });
+  });
+}
+
+// Delete an article
+function deleteArticle(id) {
+  return new Promise((resolve, reject) => {
+    Article.destroy({
+      where: { id: parseInt(id) },
+    })
+      .then((count) => {
+        if (count === 0) {
+          reject("Article not found");
+          return;
+        }
+        resolve();
+      })
+      .catch((err) => {
+        console.error("Error deleting article:", err);
+        reject("Error deleting article");
+      });
+  });
+}
+
 // Get articles by category
 function getArticlesByCategory(categoryId) {
   return new Promise((resolve, reject) => {
@@ -268,6 +329,8 @@ module.exports = {
   getPublishedArticles,
   getCategories,
   addArticle,
+  updateArticle,
+  deleteArticle,
   getArticlesByCategory,
   getArticlesByMinDate,
   getArticleById,
