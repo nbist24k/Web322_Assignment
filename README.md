@@ -45,7 +45,7 @@ A professional car blog application built with Node.js, Express.js, and PostgreS
 }
 ```
 
-## 🗄️ Project Structure
+## 🗄️ Project Configuration
 
 ```
 ├── models/
@@ -105,7 +105,7 @@ A professional car blog application built with Node.js, Express.js, and PostgreS
 
 ## 🚀 Setup Instructions
 
-1. **Clone Repository**
+1. Clone Repository
 
    ```bash
    git clone https://github.com/nbist24k/Web322_Assignment.git
@@ -154,7 +154,7 @@ A professional car blog application built with Node.js, Express.js, and PostgreS
    npm start
    ```
 
-Access the application at: `http://localhost:4250`
+Access the application at: `http://localhost:<PORT>`
 
 ## 🌟 Features
 
