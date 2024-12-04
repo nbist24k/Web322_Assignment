@@ -3,7 +3,7 @@
  * Student Number: 157716226
  * Email: nbist1@myseneca.ca
  * Date Created: 2024/10/04
- * Last Modified: 2024/11/21
+ * Last Modified: 2024/12/04
  */
 
 // Core Module Imports
@@ -40,13 +40,11 @@ const upload = multer({
     fileSize: MAX_FILE_SIZE,
   },
   fileFilter: (req, file, cb) => {
-    // Validate file type
     if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
       cb(new Error("Only JPG, PNG, and GIF images are allowed"));
       return;
     }
 
-    // Validate file size
     if (parseInt(req.headers["content-length"]) > MAX_FILE_SIZE) {
       cb(new Error("File size exceeds 4.5MB limit for deployment"));
       return;
@@ -276,9 +274,37 @@ app.post("/articles/add", handleUpload, (req, res) => {
 });
 
 // Update Article Route
-app.put("/articles/:id", async (req, res) => {
+app.put("/articles/:id", upload, async (req, res) => {
   try {
-    const article = await contentService.updateArticle(req.params.id, req.body);
+    let imageUrl = undefined;
+
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: "image",
+            allowed_formats: ["jpg", "jpeg", "png", "gif"],
+            max_bytes: MAX_FILE_SIZE,
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+      imageUrl = result.url;
+    }
+
+    const articleData = {
+      ...req.body,
+      featureImage: imageUrl,
+    };
+
+    const article = await contentService.updateArticle(
+      req.params.id,
+      articleData
+    );
     res.json(article);
   } catch (err) {
     res.status(500).json({ error: err.message || "Error updating article" });

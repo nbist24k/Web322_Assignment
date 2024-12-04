@@ -15,7 +15,7 @@
           <%= error %>
         </div>
       <% } else if (article) { %>
-        <form id="editForm" onsubmit="handleSubmit(event)">
+        <form id="editForm" method="post" enctype="multipart/form-data" onsubmit="handleSubmit(event)">
           <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input
@@ -47,21 +47,32 @@
             >
               <option value="">Select a category</option>
               <% categories.forEach(function(category) { %>
-                <option value="<%= category.id %>" <%= article.categoryId === category.id ? 'selected' : '' %>>
+                <option value="<%= category.id %>" <%= article.categoryid === category.id ? 'selected' : '' %>>
                   <%= category.name %>
                 </option>
               <% }); %>
             </select>
           </div>
           <div class="mb-3">
-            <label for="featureImage" class="form-label">Feature Image URL</label>
+            <label for="featureImage" class="form-label">Feature Image</label>
             <input
-              type="url"
+              type="file"
               class="form-control"
               id="featureImage"
               name="featureImage"
-              value="<%= article.featureImage %>"
+              accept="image/jpeg,image/png,image/gif"
+              onchange="validateFile(this)"
             />
+            <% if (article.featureimage) { %>
+              <div class="mt-2">
+                <img src="<%= article.featureimage %>" alt="Current feature image" style="max-width: 200px; height: auto;" class="mb-2">
+                <p class="form-text">Current image. Upload a new one to replace it.</p>
+              </div>
+            <% } %>
+            <div class="form-text">
+              Supported formats: JPG, JPEG, PNG, GIF. Maximum size: 4.5MB for deployment
+            </div>
+            <div id="errorAlert" class="alert alert-danger mt-2 d-none" role="alert"></div>
           </div>
           <div class="mb-3 form-check">
             <input
@@ -90,6 +101,34 @@
         </form>
 
         <script>
+          function validateFile(input) {
+            const errorAlert = document.getElementById("errorAlert");
+            const maxSize = 4.5 * 1024 * 1024;
+            const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+
+            if (input.files && input.files[0]) {
+              const file = input.files[0];
+
+              if (!allowedTypes.includes(file.type)) {
+                errorAlert.textContent = "Only JPG, PNG, and GIF images are allowed";
+                errorAlert.classList.remove("d-none");
+                input.value = "";
+                return false;
+              }
+
+              if (file.size > maxSize) {
+                errorAlert.textContent = "File size must be less than 4.5MB for deployment";
+                errorAlert.classList.remove("d-none");
+                input.value = "";
+                return false;
+              }
+
+              errorAlert.classList.add("d-none");
+              return true;
+            }
+            return true;
+          }
+
           async function handleSubmit(event) {
             event.preventDefault();
             const form = event.target;
@@ -98,17 +137,7 @@
             try {
               const response = await fetch(`/articles/<%= article.id %>`, {
                 method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  title: formData.get('title'),
-                  content: formData.get('content'),
-                  categoryId: formData.get('categoryId'),
-                  published: formData.get('published') === 'on',
-                  featureImage: formData.get('featureImage'),
-                  source: formData.get('source')
-                }),
+                body: formData
               });
 
               if (!response.ok) {
