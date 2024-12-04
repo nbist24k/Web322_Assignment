@@ -30,6 +30,9 @@ const sequelize = new Sequelize(
     },
     logging: false,
     native: false,
+    define: {
+      underscored: true, // Global setting for underscored naming
+    },
   }
 );
 
@@ -39,12 +42,12 @@ const Category = require("./category")(sequelize);
 
 // Define associations
 Category.hasMany(Article, {
-  foreignKey: "categoryId",
+  foreignKey: "categoryid", // Changed from categoryId to match PostgreSQL column name
   as: "articles",
 });
 
 Article.belongsTo(Category, {
-  foreignKey: "categoryId",
+  foreignKey: "categoryid", // Changed from categoryId to match PostgreSQL column name
   as: "category",
 });
 

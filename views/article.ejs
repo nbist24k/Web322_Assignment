@@ -90,9 +90,9 @@
       </div>
       <% } else if (article) { %>
       <div class="article-container">
-        <% if (article.featureImage) { %>
+        <% if (article.featureimage) { %>
         <img
-          src="<%= article.featureImage %>"
+          src="<%= article.featureimage %>"
           alt="<%= article.title %>"
           class="article-image"
         />
@@ -102,10 +102,14 @@
           <h1><%= article.title %></h1>
 
           <div class="article-meta">
-            <span
-              ><i class="bi bi-calendar"></i> <%= article.publishedDate %></span
-            >
-            <span><i class="bi bi-tag"></i> <%= article.categoryName %></span>
+            <span>
+              <i class="bi bi-calendar"></i>
+              <%= article.publisheddate %>
+            </span>
+            <span>
+              <i class="bi bi-tag"></i>
+              <%= article.categoryName %>
+            </span>
             <span>
               <i class="bi bi-check-circle"></i>
               <%= article.published ? 'Published' : 'Draft' %>

@@ -17,21 +17,27 @@ module.exports = (sequelize) => {
         type: DataTypes.TEXT,
         allowNull: false,
       },
-      categoryId: {
+      categoryid: {
+        // Changed from categoryId to match PostgreSQL column name
         type: DataTypes.INTEGER,
         allowNull: false,
+        field: "categoryid", // Explicitly specify the column name
       },
       published: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
-      publishedDate: {
+      publisheddate: {
+        // Changed from publishedDate to match PostgreSQL column name
         type: DataTypes.DATEONLY,
         defaultValue: DataTypes.NOW,
+        field: "publisheddate", // Explicitly specify the column name
       },
-      featureImage: {
+      featureimage: {
+        // Changed from featureImage to match PostgreSQL column name
         type: DataTypes.STRING,
         allowNull: true,
+        field: "featureimage", // Explicitly specify the column name
       },
       source: {
         type: DataTypes.STRING,
@@ -41,6 +47,7 @@ module.exports = (sequelize) => {
     {
       timestamps: false,
       tableName: "articles",
+      underscored: true, // Use underscored naming convention
     }
   );
 

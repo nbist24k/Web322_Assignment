@@ -2,35 +2,23 @@ const { Sequelize } = require("sequelize");
 const { sequelize, Article, Category } = require("./models");
 
 // Initialize function to sync database with optimized retry logic
-function initialize() {
-  return new Promise(async (resolve, reject) => {
-    let retries = 5;
-    const timeout = 5000; // 5 seconds timeout between retries
+async function initialize() {
+  let retries = 5;
+  const timeout = 5000; // 5 seconds timeout between retries
 
-    const tryConnect = async () => {
-      try {
-        await sequelize.authenticate();
-        console.log("Database connection successful.");
-        await sequelize.sync();
-        console.log("Database synchronized successfully.");
-        return true;
-      } catch (err) {
-        console.error("Connection attempt failed:", err.message);
-        return false;
-      }
-    };
-
-    while (retries > 0) {
-      const connected = await tryConnect();
-      if (connected) {
-        resolve();
-        return;
-      }
-
+  while (retries > 0) {
+    try {
+      await sequelize.authenticate();
+      console.log("Database connection successful.");
+      await sequelize.sync();
+      console.log("Database synchronized successfully.");
+      return;
+    } catch (err) {
+      console.error("Connection attempt failed:", err.message);
       retries--;
+
       if (retries === 0) {
-        reject("Unable to sync the database after multiple attempts");
-        return;
+        throw new Error("Unable to sync the database after multiple attempts");
       }
 
       console.log(
@@ -40,13 +28,13 @@ function initialize() {
       );
       await new Promise((res) => setTimeout(res, timeout));
     }
-  });
+  }
 }
 
 // Get published articles
-function getPublishedArticles() {
-  return new Promise((resolve, reject) => {
-    Article.findAll({
+async function getPublishedArticles() {
+  try {
+    const articles = await Article.findAll({
       where: { published: true },
       include: [
         {
@@ -54,218 +42,199 @@ function getPublishedArticles() {
           as: "category",
         },
       ],
-    })
-      .then((articles) => {
-        if (!articles || articles.length === 0) {
-          reject("No published articles available");
-          return;
-        }
-        const formattedArticles = articles.map((article) => ({
-          ...article.get({ plain: true }),
-          categoryName: article.category.name,
-        }));
-        resolve(formattedArticles);
-      })
-      .catch((err) => {
-        console.error("Error fetching published articles:", err);
-        reject("Error fetching published articles");
-      });
-  });
+      order: [["publisheddate", "DESC"]], // Order by publish date, newest first
+    });
+
+    if (!articles || articles.length === 0) {
+      throw new Error("No published articles available");
+    }
+
+    return articles.map((article) => ({
+      ...article.get({ plain: true }),
+      categoryName: article.category.name,
+    }));
+  } catch (err) {
+    console.error("Error fetching published articles:", err);
+    throw new Error("Error fetching published articles");
+  }
 }
 
 // Get all articles
-function getAllArticles() {
-  return new Promise((resolve, reject) => {
-    Article.findAll({
+async function getAllArticles() {
+  try {
+    const articles = await Article.findAll({
       include: [
         {
           model: Category,
           as: "category",
         },
       ],
-    })
-      .then((articles) => {
-        if (!articles || articles.length === 0) {
-          reject("No articles available");
-          return;
-        }
-        const formattedArticles = articles.map((article) => ({
-          ...article.get({ plain: true }),
-          categoryName: article.category.name,
-        }));
-        resolve(formattedArticles);
-      })
-      .catch((err) => {
-        console.error("Error fetching all articles:", err);
-        reject("Error fetching articles");
-      });
-  });
+      order: [
+        ["publisheddate", "DESC"], // Primary sort by publish date
+        ["title", "ASC"], // Secondary sort by title
+      ],
+    });
+
+    if (!articles || articles.length === 0) {
+      throw new Error("No articles available");
+    }
+
+    return articles.map((article) => ({
+      ...article.get({ plain: true }),
+      categoryName: article.category.name,
+    }));
+  } catch (err) {
+    console.error("Error fetching all articles:", err);
+    throw new Error("Error fetching articles");
+  }
 }
 
 // Get all categories
-function getCategories() {
-  return new Promise((resolve, reject) => {
-    Category.findAll()
-      .then((categories) => {
-        if (!categories || categories.length === 0) {
-          reject("No categories available");
-          return;
-        }
-        resolve(categories);
-      })
-      .catch((err) => {
-        console.error("Error fetching categories:", err);
-        reject("Error fetching categories");
-      });
-  });
+async function getCategories() {
+  try {
+    const categories = await Category.findAll({});
+
+    if (!categories || categories.length === 0) {
+      throw new Error("No categories available");
+    }
+
+    return categories;
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    throw new Error("Error fetching categories");
+  }
 }
 
 // Add an article
-function addArticle(articleData) {
-  return new Promise((resolve, reject) => {
-    if (!articleData) {
-      reject("No article data provided");
-      return;
-    }
+async function addArticle(articleData) {
+  if (!articleData) {
+    throw new Error("No article data provided");
+  }
 
-    Article.create({
+  try {
+    const article = await Article.create({
       title: articleData.title || "",
       content: articleData.content || "",
-      categoryId: parseInt(articleData.categoryId),
+      categoryid: parseInt(articleData.categoryId),
       published: articleData.published === undefined ? false : true,
-      publishedDate: new Date().toISOString().split("T")[0],
-      featureImage: articleData.featureImage || "",
+      publisheddate: new Date().toISOString().split("T")[0],
+      featureimage: articleData.featureImage || "",
       source: articleData.source || "",
-    })
-      .then((article) => {
-        return Article.findByPk(article.id, {
-          include: [
-            {
-              model: Category,
-              as: "category",
-            },
-          ],
-        });
-      })
-      .then((article) => {
-        const formattedArticle = {
-          ...article.get({ plain: true }),
-          categoryName: article.category.name,
-        };
-        resolve(formattedArticle);
-      })
-      .catch((err) => {
-        console.error("Error adding article:", err);
-        reject("Error adding article");
-      });
-  });
+    });
+
+    const articleWithCategory = await Article.findByPk(article.id, {
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+      ],
+    });
+
+    return {
+      ...articleWithCategory.get({ plain: true }),
+      categoryName: articleWithCategory.category.name,
+    };
+  } catch (err) {
+    console.error("Error adding article:", err);
+    throw new Error("Error adding article");
+  }
 }
 
 // Update an article
-function updateArticle(id, articleData) {
-  return new Promise((resolve, reject) => {
-    if (!articleData) {
-      reject("No article data provided");
-      return;
-    }
+async function updateArticle(id, articleData) {
+  if (!articleData) {
+    throw new Error("No article data provided");
+  }
 
-    Article.update(
+  try {
+    await Article.update(
       {
         title: articleData.title,
         content: articleData.content,
-        categoryId: parseInt(articleData.categoryId),
+        categoryid: parseInt(articleData.categoryId),
         published: articleData.published === undefined ? false : true,
-        featureImage: articleData.featureImage,
+        featureimage: articleData.featureImage,
         source: articleData.source,
       },
       {
         where: { id: parseInt(id) },
       }
-    )
-      .then(() => {
-        return Article.findByPk(id, {
-          include: [
-            {
-              model: Category,
-              as: "category",
-            },
-          ],
-        });
-      })
-      .then((article) => {
-        if (!article) {
-          reject("Article not found");
-          return;
-        }
-        const formattedArticle = {
-          ...article.get({ plain: true }),
-          categoryName: article.category.name,
-        };
-        resolve(formattedArticle);
-      })
-      .catch((err) => {
-        console.error("Error updating article:", err);
-        reject("Error updating article");
-      });
-  });
-}
+    );
 
-// Delete an article
-function deleteArticle(id) {
-  return new Promise((resolve, reject) => {
-    Article.destroy({
-      where: { id: parseInt(id) },
-    })
-      .then((count) => {
-        if (count === 0) {
-          reject("Article not found");
-          return;
-        }
-        resolve();
-      })
-      .catch((err) => {
-        console.error("Error deleting article:", err);
-        reject("Error deleting article");
-      });
-  });
-}
-
-// Get articles by category
-function getArticlesByCategory(categoryId) {
-  return new Promise((resolve, reject) => {
-    Article.findAll({
-      where: { categoryId: categoryId },
+    const article = await Article.findByPk(id, {
       include: [
         {
           model: Category,
           as: "category",
         },
       ],
-    })
-      .then((articles) => {
-        if (!articles || articles.length === 0) {
-          reject(`No articles found for category ID: ${categoryId}`);
-          return;
-        }
-        const formattedArticles = articles.map((article) => ({
-          ...article.get({ plain: true }),
-          categoryName: article.category.name,
-        }));
-        resolve(formattedArticles);
-      })
-      .catch((err) => {
-        console.error("Error fetching articles by category:", err);
-        reject("Error fetching articles by category");
-      });
-  });
+    });
+
+    if (!article) {
+      throw new Error("Article not found");
+    }
+
+    return {
+      ...article.get({ plain: true }),
+      categoryName: article.category.name,
+    };
+  } catch (err) {
+    console.error("Error updating article:", err);
+    throw new Error("Error updating article");
+  }
+}
+
+// Delete an article
+async function deleteArticle(id) {
+  try {
+    const count = await Article.destroy({
+      where: { id: parseInt(id) },
+    });
+
+    if (count === 0) {
+      throw new Error("Article not found");
+    }
+  } catch (err) {
+    console.error("Error deleting article:", err);
+    throw new Error("Error deleting article");
+  }
+}
+
+// Get articles by category
+async function getArticlesByCategory(categoryId) {
+  try {
+    const articles = await Article.findAll({
+      where: { categoryid: categoryId },
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+      ],
+      order: [["publisheddate", "DESC"]], // Order by publish date within category
+    });
+
+    if (!articles || articles.length === 0) {
+      throw new Error(`No articles found for category ID: ${categoryId}`);
+    }
+
+    return articles.map((article) => ({
+      ...article.get({ plain: true }),
+      categoryName: article.category.name,
+    }));
+  } catch (err) {
+    console.error("Error fetching articles by category:", err);
+    throw new Error("Error fetching articles by category");
+  }
 }
 
 // Get articles by minimum date
-function getArticlesByMinDate(minDateStr) {
-  return new Promise((resolve, reject) => {
-    Article.findAll({
+async function getArticlesByMinDate(minDateStr) {
+  try {
+    const articles = await Article.findAll({
       where: {
-        publishedDate: {
+        publisheddate: {
           [Sequelize.Op.gte]: minDateStr,
         },
       },
@@ -275,52 +244,47 @@ function getArticlesByMinDate(minDateStr) {
           as: "category",
         },
       ],
-    })
-      .then((articles) => {
-        if (!articles || articles.length === 0) {
-          reject("No results returned");
-          return;
-        }
-        const formattedArticles = articles.map((article) => ({
-          ...article.get({ plain: true }),
-          categoryName: article.category.name,
-        }));
-        resolve(formattedArticles);
-      })
-      .catch((err) => {
-        console.error("Error fetching articles by date:", err);
-        reject("Error fetching articles by date");
-      });
-  });
+      order: [["publisheddate", "DESC"]], // Order by publish date
+    });
+
+    if (!articles || articles.length === 0) {
+      throw new Error("No results returned");
+    }
+
+    return articles.map((article) => ({
+      ...article.get({ plain: true }),
+      categoryName: article.category.name,
+    }));
+  } catch (err) {
+    console.error("Error fetching articles by date:", err);
+    throw new Error("Error fetching articles by date");
+  }
 }
 
 // Get article by ID
-function getArticleById(id) {
-  return new Promise((resolve, reject) => {
-    Article.findByPk(id, {
+async function getArticleById(id) {
+  try {
+    const article = await Article.findByPk(id, {
       include: [
         {
           model: Category,
           as: "category",
         },
       ],
-    })
-      .then((article) => {
-        if (!article) {
-          reject("No result returned");
-          return;
-        }
-        const formattedArticle = {
-          ...article.get({ plain: true }),
-          categoryName: article.category.name,
-        };
-        resolve(formattedArticle);
-      })
-      .catch((err) => {
-        console.error("Error fetching article by ID:", err);
-        reject("Error fetching article by ID");
-      });
-  });
+    });
+
+    if (!article) {
+      throw new Error("No result returned");
+    }
+
+    return {
+      ...article.get({ plain: true }),
+      categoryName: article.category.name,
+    };
+  } catch (err) {
+    console.error("Error fetching article by ID:", err);
+    throw new Error("Error fetching article by ID");
+  }
 }
 
 module.exports = {
