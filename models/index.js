@@ -31,6 +31,8 @@ const initializeSequelize = () => {
           max: 5,
           timeout: 3000,
         },
+        logging: false,
+        native: false, // Disable native PostgreSQL bindings
       }
     );
   }
