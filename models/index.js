@@ -1,15 +1,16 @@
 const { Sequelize } = require("sequelize");
+require("dotenv").config();
 
 // Create Sequelize instance with optimized settings for serverless
 const sequelize = new Sequelize(
-  "Web322_AS5",
-  "Web322_AS5_owner",
-  "CQRuIp19Jcem",
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: "ep-red-shadow-a5kpb4y0.us-east-2.aws.neon.tech",
+    host: process.env.DB_HOST,
     dialect: "postgres",
     dialectModule: require("pg"),
-    port: 5432,
+    port: process.env.DB_PORT,
     dialectOptions: {
       ssl: {
         require: true,
@@ -31,7 +32,7 @@ const sequelize = new Sequelize(
     logging: false,
     native: false,
     define: {
-      underscored: true, // Global setting for underscored naming
+      underscored: true,
     },
   }
 );
@@ -42,12 +43,12 @@ const Category = require("./category")(sequelize);
 
 // Define associations
 Category.hasMany(Article, {
-  foreignKey: "categoryid", // Changed from categoryId to match PostgreSQL column name
+  foreignKey: "categoryid",
   as: "articles",
 });
 
 Article.belongsTo(Category, {
-  foreignKey: "categoryid", // Changed from categoryId to match PostgreSQL column name
+  foreignKey: "categoryid",
   as: "category",
 });
 

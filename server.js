@@ -3,12 +3,13 @@
  * Student Number: 157716226
  * Email: nbist1@myseneca.ca
  * Date Created: 2024/10/04
- * Last Modified: 2024/12/04
+ * Last Modified: 2024/11/21
  */
 
 // Core Module Imports
 const express = require("express");
 const path = require("path");
+require("dotenv").config();
 
 // Third-party Module Imports
 const multer = require("multer");
@@ -80,9 +81,9 @@ const handleUpload = (req, res, next) => {
 
 // Cloudinary Configuration
 cloudinary.config({
-  cloud_name: "doupy867d",
-  api_key: "937327957236582",
-  api_secret: "7VM1-mzRECI77BU_xkSbYPMi81g",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
 });
 
