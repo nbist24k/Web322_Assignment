@@ -7,7 +7,7 @@
  */
 
 // dotenv configuration
-require("dotenv").config();
+//require("dotenv").config();
 
 //require the express module
 const express = require("express");

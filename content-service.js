@@ -3,105 +3,102 @@
  * Student Number: 157716226
  * Email: nbist1@myseneca.ca
  * Date Created: 2024/10/04
- * Last Modified: 2024/11/21
+ * Last Modified: 2024/12/04
  */
 
-// require the fs module
-const fs = require("fs");
+const { Sequelize } = require("sequelize");
+const { sequelize, Article, Category } = require("./models");
 
-// require the path module
-const path = require("path");
-
-//Global arrays to store the data
-let articles = [];
-let categories = [];
-
-//path to the data folder
-const dataDir = path.join(__dirname, "data");
-
-// Initialize function to load data from articles.json and categories.json
+// Initialize function to sync database
 function initialize() {
-  return new Promise((resolve, reject) => {
-    // Read articles.json from the data folder
-    fs.readFile(path.join(dataDir, "articles.json"), "utf8", (err, data) => {
-      if (err) {
-        reject("Unable to read articles file");
-        return;
-      }
-      try {
-        articles = JSON.parse(data); // Store parsed articles in the global array
-      } catch (parseError) {
-        reject("Error parsing articles file");
-        return;
-      }
-
-      // Now read categories.json from the data folder
-      fs.readFile(
-        path.join(dataDir, "categories.json"),
-        "utf8",
-        (err, data) => {
-          if (err) {
-            reject("Unable to read categories file");
-            return;
-          }
-          try {
-            categories = JSON.parse(data); // Store parsed categories in the global array
-            resolve(); // Both files have been read successfully
-          } catch (parseError) {
-            reject("Error parsing categories file");
-          }
-        }
-      );
-    });
+  return new Promise(async (resolve, reject) => {
+    try {
+      await sequelize.authenticate();
+      console.log("Database connection successful.");
+      await sequelize.sync();
+      console.log("Database synchronized successfully.");
+      resolve();
+    } catch (err) {
+      console.error("Database initialization error:", err);
+      reject("Unable to sync the database: " + err.message);
+    }
   });
 }
 
-function getCategoryNameById(categoryId) {
-  const category = categories.find((cat) => cat.id === categoryId);
-  return category ? category.name : "Unknown Category";
-}
-
-function addCategoryDetailsToArticle(article) {
-  return {
-    ...article,
-    categoryName: getCategoryNameById(article.categoryId),
-  };
-}
-
-//Get published articles (only those with `published` set to true)
+// Get published articles
 function getPublishedArticles() {
   return new Promise((resolve, reject) => {
-    const publishedArticles = articles
-      .filter((article) => article.published === true)
-      .map(addCategoryDetailsToArticle);
-    if (publishedArticles.length > 0) {
-      resolve(publishedArticles);
-    } else {
-      reject("No published articles available");
-    }
+    Article.findAll({
+      where: { published: true },
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+      ],
+    })
+      .then((articles) => {
+        if (!articles || articles.length === 0) {
+          reject("No published articles available");
+          return;
+        }
+        const formattedArticles = articles.map((article) => ({
+          ...article.get({ plain: true }),
+          categoryName: article.category.name,
+        }));
+        resolve(formattedArticles);
+      })
+      .catch((err) => {
+        console.error("Error fetching published articles:", err);
+        reject("Error fetching published articles");
+      });
   });
 }
 
-//Get all articles
+// Get all articles
 function getAllArticles() {
   return new Promise((resolve, reject) => {
-    if (articles.length > 0) {
-      const articlesWithCategories = articles.map(addCategoryDetailsToArticle);
-      resolve(articlesWithCategories);
-    } else {
-      reject("No articles available");
-    }
+    Article.findAll({
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+      ],
+    })
+      .then((articles) => {
+        if (!articles || articles.length === 0) {
+          reject("No articles available");
+          return;
+        }
+        const formattedArticles = articles.map((article) => ({
+          ...article.get({ plain: true }),
+          categoryName: article.category.name,
+        }));
+        resolve(formattedArticles);
+      })
+      .catch((err) => {
+        console.error("Error fetching all articles:", err);
+        reject("Error fetching articles");
+      });
   });
 }
 
-//Get all categories
+// Get all categories
 function getCategories() {
   return new Promise((resolve, reject) => {
-    if (categories.length > 0) {
-      resolve(categories);
-    } else {
-      reject("No categories available");
-    }
+    Category.findAll()
+      .then((categories) => {
+        if (!categories || categories.length === 0) {
+          reject("No categories available");
+          return;
+        }
+        resolve(categories);
+      })
+      .catch((err) => {
+        console.error("Error fetching categories:", err);
+        reject("Error fetching categories");
+      });
   });
 }
 
@@ -112,8 +109,8 @@ function addArticle(articleData) {
       reject("No article data provided");
       return;
     }
-    const newArticle = {
-      id: articles.length + 1,
+
+    Article.create({
       title: articleData.title || "",
       content: articleData.content || "",
       categoryId: parseInt(articleData.categoryId),
@@ -121,58 +118,124 @@ function addArticle(articleData) {
       publishedDate: new Date().toISOString().split("T")[0],
       featureImage: articleData.featureImage || "",
       source: articleData.source || "",
-    };
-
-    articles.push(newArticle);
-    resolve(addCategoryDetailsToArticle(newArticle));
+    })
+      .then((article) => {
+        return Article.findByPk(article.id, {
+          include: [
+            {
+              model: Category,
+              as: "category",
+            },
+          ],
+        });
+      })
+      .then((article) => {
+        const formattedArticle = {
+          ...article.get({ plain: true }),
+          categoryName: article.category.name,
+        };
+        resolve(formattedArticle);
+      })
+      .catch((err) => {
+        console.error("Error adding article:", err);
+        reject("Error adding article");
+      });
   });
 }
 
 // Get articles by category
 function getArticlesByCategory(categoryId) {
   return new Promise((resolve, reject) => {
-    const filteredArticles = articles
-      .filter((article) => article.categoryId === categoryId)
-      .map(addCategoryDetailsToArticle);
-    if (filteredArticles.length > 0) {
-      resolve(filteredArticles);
-    } else {
-      reject(
-        `No articles found for category: ${getCategoryNameById(categoryId)}`
-      );
-    }
+    Article.findAll({
+      where: { categoryId: categoryId },
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+      ],
+    })
+      .then((articles) => {
+        if (!articles || articles.length === 0) {
+          reject(`No articles found for category ID: ${categoryId}`);
+          return;
+        }
+        const formattedArticles = articles.map((article) => ({
+          ...article.get({ plain: true }),
+          categoryName: article.category.name,
+        }));
+        resolve(formattedArticles);
+      })
+      .catch((err) => {
+        console.error("Error fetching articles by category:", err);
+        reject("Error fetching articles by category");
+      });
   });
 }
 
 // Get articles by minimum date
 function getArticlesByMinDate(minDateStr) {
   return new Promise((resolve, reject) => {
-    const filteredArticles = articles
-      .filter(
-        (article) => new Date(article.publishedDate) >= new Date(minDateStr)
-      )
-      .map(addCategoryDetailsToArticle);
-    if (filteredArticles.length > 0) {
-      resolve(filteredArticles);
-    } else {
-      reject("No results returned");
-    }
+    Article.findAll({
+      where: {
+        publishedDate: {
+          [Sequelize.Op.gte]: minDateStr,
+        },
+      },
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+      ],
+    })
+      .then((articles) => {
+        if (!articles || articles.length === 0) {
+          reject("No results returned");
+          return;
+        }
+        const formattedArticles = articles.map((article) => ({
+          ...article.get({ plain: true }),
+          categoryName: article.category.name,
+        }));
+        resolve(formattedArticles);
+      })
+      .catch((err) => {
+        console.error("Error fetching articles by date:", err);
+        reject("Error fetching articles by date");
+      });
   });
 }
 
 // Get article by ID
 function getArticleById(id) {
   return new Promise((resolve, reject) => {
-    const article = articles.find((article) => article.id === id);
-    if (article) {
-      resolve(addCategoryDetailsToArticle(article));
-    } else {
-      reject("No result returned");
-    }
+    Article.findByPk(id, {
+      include: [
+        {
+          model: Category,
+          as: "category",
+        },
+      ],
+    })
+      .then((article) => {
+        if (!article) {
+          reject("No result returned");
+          return;
+        }
+        const formattedArticle = {
+          ...article.get({ plain: true }),
+          categoryName: article.category.name,
+        };
+        resolve(formattedArticle);
+      })
+      .catch((err) => {
+        console.error("Error fetching article by ID:", err);
+        reject("Error fetching article by ID");
+      });
   });
 }
 
-// Export all functions
 module.exports = {
   initialize,
   getAllArticles,
