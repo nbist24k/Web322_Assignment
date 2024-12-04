@@ -6,56 +6,47 @@
  * Last Modified: 2024/11/21
  */
 
-// dotenv configuration
-//require("dotenv").config();
-
-//require the express module
+// Core Module Imports
 const express = require("express");
-
-//require the path module
 const path = require("path");
 
-//get the app object from express
-const app = express();
-
-//require the content-service module
-const contentService = require("./content-service");
-
-//get the port from the environment variable
-const HTTP_PORT = process.env.PORT || 4250;
-
-// File size limit (4.5MB) for vercel deployment
-const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
-
-// Allowed image MIME types
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif"];
-
-// modules for the add post form
+// Third-party Module Imports
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 
-// Set the view engine to ejs
+// Custom Module Imports
+const contentService = require("./content-service");
+
+// Constants
+const HTTP_PORT = process.env.PORT || 4250;
+const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB limit for Vercel deployment
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif"];
+
+// Initialize Express App
+const app = express();
+
+// View Engine Setup
 app.set("view engine", "ejs");
 
-//Middleware
-app.use(express.static(__dirname + "/public"));
+// Middleware Configuration
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Multer configuration with strict file size limit
+// Multer Configuration
 const upload = multer({
   limits: {
     fileSize: MAX_FILE_SIZE,
   },
   fileFilter: (req, file, cb) => {
-    // Check file type first
+    // Validate file type
     if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
       cb(new Error("Only JPG, PNG, and GIF images are allowed"));
       return;
     }
 
-    // Then check file size
+    // Validate file size
     if (parseInt(req.headers["content-length"]) > MAX_FILE_SIZE) {
       cb(new Error("File size exceeds 4.5MB limit for deployment"));
       return;
@@ -65,7 +56,7 @@ const upload = multer({
   },
 }).single("featureImage");
 
-// Custom error handling middleware for multer
+// Custom Upload Handler
 const handleUpload = (req, res, next) => {
   upload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -89,7 +80,7 @@ const handleUpload = (req, res, next) => {
   });
 };
 
-//Cloudinary config
+// Cloudinary Configuration
 cloudinary.config({
   cloud_name: "doupy867d",
   api_key: "937327957236582",
@@ -97,17 +88,19 @@ cloudinary.config({
   secure: true,
 });
 
-//Home route
+// Route Handlers
+
+// Home Route
 app.get("/", (req, res) => {
   res.render("home", { path: "/" });
 });
 
-//About route
+// About Route
 app.get("/about", (req, res) => {
   res.render("about", { path: "/about" });
 });
 
-//Updated /articles route with query parameters
+// Articles Routes
 app.get("/articles", async (req, res) => {
   try {
     const { category, minDate } = req.query;
@@ -135,7 +128,7 @@ app.get("/articles", async (req, res) => {
   }
 });
 
-//Categories route
+// Categories Route
 app.get("/categories", async (req, res) => {
   try {
     const categories = await contentService.getCategories();
@@ -153,27 +146,30 @@ app.get("/categories", async (req, res) => {
   }
 });
 
-//Add post route
+// Add Article Routes
 app.get("/articles/add", async (req, res) => {
   try {
     const categories = await contentService.getCategories();
-    res.render("addArticle", { path: "/articles/add", categories });
+    res.render("addArticle", {
+      path: "/articles/add",
+      categories,
+      error: req.query.error,
+    });
   } catch (err) {
     res.render("addArticle", {
       path: "/articles/add",
       categories: [],
-      error: err,
+      error: err.message,
     });
   }
 });
 
-// New route to get article by ID
+// Single Article Route
 app.get("/article/:id", async (req, res) => {
   try {
     const article = await contentService.getArticleById(
       parseInt(req.params.id)
     );
-
     if (!article) {
       return res.render("article", {
         article: null,
@@ -181,15 +177,6 @@ app.get("/article/:id", async (req, res) => {
         error: "Article not found",
       });
     }
-
-    if (!article.published) {
-      return res.render("article", {
-        article: null,
-        path: "/articles",
-        error: "Article is not published",
-      });
-    }
-
     res.render("article", {
       article,
       path: "/articles",
@@ -204,43 +191,80 @@ app.get("/article/:id", async (req, res) => {
   }
 });
 
-// Handle article creation with optional image upload
-// This endpoint processes multipart form data and supports Cloudinary image uploads
-app.post("/articles/add", handleUpload, (req, res) => {
-  if (req.file) {
-    let streamUpload = (req) => {
-      return new Promise((resolve, reject) => {
-        let stream = cloudinary.uploader.upload_stream(
-          {
-            resource_type: "image",
-            allowed_formats: ["jpg", "jpeg", "png", "gif"],
-            max_bytes: MAX_FILE_SIZE,
-          },
-          (error, result) => {
-            if (result) {
-              resolve(result);
-            } else {
-              reject(error);
-            }
-          }
-        );
-        streamifier.createReadStream(req.file.buffer).pipe(stream);
-      });
-    };
+// Edit Article Route
+app.get("/articles/edit/:id", async (req, res) => {
+  try {
+    const [article, categories] = await Promise.all([
+      contentService.getArticleById(parseInt(req.params.id)),
+      contentService.getCategories(),
+    ]);
 
-    async function upload(req) {
-      try {
-        let result = await streamUpload(req);
-        return result;
-      } catch (error) {
-        throw new Error("Error uploading to Cloudinary");
-      }
+    if (!article) {
+      return res.render("editArticle", {
+        article: null,
+        categories: [],
+        path: "/articles",
+        error: "Article not found",
+      });
     }
 
-    upload(req)
-      .then((uploaded) => {
-        processArticle(uploaded.url);
-      })
+    res.render("editArticle", {
+      article,
+      categories,
+      path: "/articles",
+      error: null,
+    });
+  } catch (err) {
+    res.render("editArticle", {
+      article: null,
+      categories: [],
+      path: "/articles",
+      error: "Unable to fetch article",
+    });
+  }
+});
+
+// Add Article POST Handler
+app.post("/articles/add", handleUpload, (req, res) => {
+  const streamUpload = (req) => {
+    return new Promise((resolve, reject) => {
+      let stream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: "image",
+          allowed_formats: ["jpg", "jpeg", "png", "gif"],
+          max_bytes: MAX_FILE_SIZE,
+        },
+        (error, result) => {
+          if (result) {
+            resolve(result);
+          } else {
+            reject(error);
+          }
+        }
+      );
+      streamifier.createReadStream(req.file.buffer).pipe(stream);
+    });
+  };
+
+  const processArticle = async (imageUrl) => {
+    try {
+      const articleData = {
+        ...req.body,
+        featureImage: imageUrl,
+      };
+      await contentService.addArticle(articleData);
+      res.redirect("/articles");
+    } catch (err) {
+      res.redirect(
+        "/articles/add?error=" +
+          encodeURIComponent(err.message || "Error creating article")
+      );
+    }
+  };
+
+  if (req.file) {
+    streamUpload(req)
+      .then((uploaded) => processArticle(uploaded.url))
       .catch((error) => {
         res.redirect(
           "/articles/add?error=" + encodeURIComponent(error.message)
@@ -249,31 +273,37 @@ app.post("/articles/add", handleUpload, (req, res) => {
   } else {
     processArticle("");
   }
+});
 
-  function processArticle(imageUrl) {
-    req.body.featureImage = imageUrl;
-    contentService
-      .addArticle(req.body)
-      .then(() => res.redirect("/articles"))
-      .catch((err) => {
-        res.redirect(
-          "/articles/add?error=" +
-            encodeURIComponent(err.message || "Error creating article")
-        );
-      });
+// Update Article Route
+app.put("/articles/:id", async (req, res) => {
+  try {
+    const article = await contentService.updateArticle(req.params.id, req.body);
+    res.json(article);
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Error updating article" });
   }
 });
 
-// 404 route
+// Delete Article Route
+app.delete("/articles/:id", async (req, res) => {
+  try {
+    await contentService.deleteArticle(req.params.id);
+    res.json({ message: "Article deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Error deleting article" });
+  }
+});
+
+// 404 Handler
 app.use((req, res) => {
   res.status(404).render("404", { path: null });
 });
 
-// Initialize the content service before starting the server
+// Initialize Server
 contentService
   .initialize()
   .then(() => {
-    // Start the server after the data has been loaded
     app.listen(HTTP_PORT, () => {
       console.log(
         `Express http server is running on http://localhost:${HTTP_PORT}`
@@ -281,6 +311,6 @@ contentService
     });
   })
   .catch((err) => {
-    console.log("Error initializing content service:", err);
+    console.error("Error initializing content service:", err);
     process.exit(1);
   });
