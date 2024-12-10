@@ -21,7 +21,7 @@ module.exports = (sequelize) => {
     {
       timestamps: false,
       tableName: "categories",
-      underscored: true, // Use underscored naming convention
+      underscored: true,
     }
   );
 

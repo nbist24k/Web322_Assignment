@@ -3,7 +3,7 @@
  * Student Number: 157716226
  * Email: nbist1@myseneca.ca
  * Date Created: 2024/10/04
- * Last Modified: 2024/12/04
+ * Last Modified: 2024/12/10
  */
 
 const { Sequelize } = require("sequelize");
@@ -11,34 +11,16 @@ const { sequelize, Article, Category } = require("./models");
 
 // Initialize function to sync database with optimized retry logic
 async function initialize() {
-  let retries = 5;
-  const timeout = 5000; // 5 seconds timeout between retries
-
-  while (retries > 0) {
-    try {
-      await sequelize.authenticate();
-      console.log("Database connection successful.");
-      await sequelize.sync();
-      console.log("Database synchronized successfully.");
-      return;
-    } catch (err) {
-      console.error("Connection attempt failed:", err.message);
-      retries--;
-
-      if (retries === 0) {
-        throw new Error("Unable to sync the database after multiple attempts");
-      }
-
-      console.log(
-        `Retrying connection in ${
-          timeout / 1000
-        } seconds... (${retries} attempts left)`
-      );
-      await new Promise((res) => setTimeout(res, timeout));
-    }
+  try {
+    await sequelize.authenticate();
+    console.log("Database connection successful.");
+    await sequelize.sync();
+    console.log("Database synchronized successfully.");
+  } catch (err) {
+    console.error("Failed to connect to the database:", err.message);
+    throw new Error("Unable to initialize the database");
   }
 }
-
 // Get published articles
 async function getPublishedArticles() {
   try {

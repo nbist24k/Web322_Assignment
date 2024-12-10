@@ -16,23 +16,6 @@ const sequelize = new Sequelize(
         require: true,
         rejectUnauthorized: false,
       },
-      keepAlive: true,
-      connectTimeout: 60000,
-    },
-    pool: {
-      max: 2,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
-    retry: {
-      max: 5,
-      timeout: 3000,
-    },
-    logging: false,
-    native: false,
-    define: {
-      underscored: true,
     },
   }
 );
