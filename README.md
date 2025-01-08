@@ -1,14 +1,5 @@
 # Web322 Assignment
 
-**Student Name**: Nirajan Bist  
-**Student Number**: 157716226  
-**Student Email**: nbist1@myseneca.ca  
-**Date Created**: 2024/09/16  
-**Last Modified**: 2024/12/04
-
-**GitHub URL**: [https://github.com/nbist24k/Web322_Assignment.git](https://github.com/nbist24k/Web322_Assignment.git)  
-**Vercel URL**: [https://web322-assignment-ten.vercel.app](https://web322-assignment-ten.vercel.app/)
-
 ## 🚀 Overview
 
 A professional car blog application built with Node.js, Express.js, and PostgreSQL, featuring article management, category filtering, and image uploads. The application showcases various automotive topics including Electric Vehicles, Sports Cars, Family SUVs, and Luxury Sedans.
